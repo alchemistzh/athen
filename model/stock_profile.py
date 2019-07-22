@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from sqlalchemy import BigInteger, Column, DateTime, String
+from sqlalchemy import BigInteger, Column, DateTime, Numeric, String
 
 from . import Base
 

@@ -6,9 +6,13 @@ from tutorial.items import TutorialItem
 
 class QuotesSpider(scrapy.Spider):
     name = 'quotes'
-    start_urls = [
-        'http://quotes.toscrape.com/tag/humor/',
-    ]
+
+    def start_requests(self):
+        urls = [
+            'http://quotes.toscrape.com/tag/humor/',
+        ]
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
         for quote in response.css('div.quote'):

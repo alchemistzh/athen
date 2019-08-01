@@ -1,4 +1,11 @@
+#!/usr/bin/env python3
+# coding: utf-8
 
+"""
+Query stock list from sse.com.cn and save to MongoDB.
+"""
+
+import logging
 import requests
 
 url = 'http://query.sse.com.cn/security/stock/getStockListData.do'
@@ -13,13 +20,15 @@ params = {
     'stockCode': '',
     'csrcCode': '',
     'areaName': '',
-    'stockType': 1,
+    'stockType': 1,  # 1: 主板A股  2: B股  8: 科创板
     'pageHelp.cacheSize': 1,
-    'pageHelp.beginPage': 31,
-    'pageHelp.pageSize': 50,
-    'pageHelp.pageNo': 2,
+    'pageHelp.beginPage': 1,  # 页数， 每次请求递增
+    'pageHelp.pageSize': 50,  # 每次请求返回的股票数量， 最大50
+    'pageHelp.pageNo': 1,
 }
 
 resp = requests.get(url, headers=headers, params=params)
-if resp.ok:
-    print(resp.json())
+if not resp.ok:
+    logging.getLogger(__name__).error("request failed: url=%s, response=%s", url, resp)
+
+print(resp.json())

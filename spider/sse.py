@@ -3,10 +3,33 @@
 
 """
 Query stock list from sse.com.cn and save to MongoDB.
+
+返回数据格式：
+{
+    "result": [
+        {
+            "COMPANY_CODE": "600000",
+            "SECURITY_ABBR_A": "浦发银行",
+            "SECURITY_ABBR_B": "-",
+            "SECURITY_CODE_A": "600000",
+            "SECURITY_CODE_B": "-",
+            "totalShares": "2935208.04",
+            "totalFlowShares": "2810376.39",
+            "NUM": "1",
+            "TYPE": "主板A股",
+            "LISTING_DATE": "1999-11-10"
+            "endDate": "2019-08-02",
+        },
+    ]
+}
 """
 
 import logging
+import pymongo
 import requests
+import time
+
+log = logging.getLogger(__name__)
 
 url = 'http://query.sse.com.cn/security/stock/getStockListData.do'
 
@@ -27,8 +50,32 @@ params = {
     'pageHelp.pageNo': 1,
 }
 
-resp = requests.get(url, headers=headers, params=params)
-if not resp.ok:
-    logging.getLogger(__name__).error("request failed: url=%s, response=%s", url, resp)
+# resp = requests.get(url, headers=headers, params=params)
+# print(resp.json())
+# exit(0)
 
-print(resp.json())
+cli = pymongo.MongoClient('mongodb://localhost:27017')
+db = cli['athen']
+COLLECTION = 'stock_profile'
+
+currentPage = 1
+stock_list = []
+
+while True:
+    params['pageHelp.beginPage'] = currentPage
+    currentPage += 1
+    resp = requests.get(url, headers=headers, params=params)
+    if not resp.ok:
+        log.error("request failed: url=%s, response=%s", url, resp)
+        break
+    r = resp.json()['result']
+    if len(r) == 0:
+        break
+    for stock in r:
+        stock_list.append({
+            '_id': stock['SECURITY_CODE_A'].strip(),
+            'name': stock['SECURITY_ABBR_A'].strip(),
+        })
+    time.sleep(0.5)
+
+db[COLLECTION].insert_many(stock_list)

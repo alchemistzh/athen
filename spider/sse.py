@@ -25,9 +25,14 @@ Query stock list from sse.com.cn and save to MongoDB.
 """
 
 import logging
-import pymongo
 import requests
 import time
+from ratelimit import limits, sleep_and_retry
+from typing import Dict, List
+
+import backoff
+import pymongo
+
 
 log = logging.getLogger(__name__)
 
@@ -54,9 +59,31 @@ params = {
 # print(resp.json())
 # exit(0)
 
-cli = pymongo.MongoClient('mongodb://localhost:27017')
-db = cli['athen']
+db = pymongo.MongoClient('mongodb://localhost:27017')['athen']
 COLLECTION = 'stock_profile'
+
+
+@backoff.on_exception(backoff.expo,
+                      requests.exceptions.RequestException,
+                      max_tries=5)
+def get_stock_list(page: int) -> List[Dict]:
+    params['pageHelp.beginPage'] = page
+    resp = requests.get(url, headers=headers, params=params)
+    if not resp.ok:
+        log.error("request failed: url=%s, response=%s", url, resp)
+        return []
+    r = resp.json()['result']
+    return [
+        {
+            '_id': stock['SECURITY_CODE_A'].strip(),
+            'name': stock['SECURITY_ABBR_A'].strip(),
+        } for stock in r
+    ]
+
+
+while True:
+    print(get_stock_list(1))
+
 
 currentPage = 1
 stock_list = []
@@ -76,6 +103,6 @@ while True:
             '_id': stock['SECURITY_CODE_A'].strip(),
             'name': stock['SECURITY_ABBR_A'].strip(),
         })
-    time.sleep(0.5)
+    time.sleep(0.3)
 
 db[COLLECTION].insert_many(stock_list)

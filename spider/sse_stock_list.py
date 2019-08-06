@@ -45,8 +45,6 @@ params = {
 
 import logging
 import requests
-import time
-from decimal import Decimal
 from typing import Dict, List
 
 import backoff
@@ -94,7 +92,7 @@ while True:
         break
     operations = [
         pymongo.UpdateOne(
-            {"_id": stock['_id']},
+            {'_id': stock['_id']},
             {'$set': stock},
             upsert=True
         )

@@ -24,18 +24,6 @@ Query stock list from sse.com.cn and save to MongoDB.
 }
 """
 
-import logging
-import requests
-import time
-from ratelimit import limits, sleep_and_retry
-from typing import Dict, List
-
-import backoff
-import pymongo
-
-
-log = logging.getLogger(__name__)
-
 url = 'http://query.sse.com.cn/security/stock/getStockListData.do'
 
 headers = {
@@ -54,6 +42,17 @@ params = {
     'pageHelp.pageSize': 50,  # 每次请求返回的股票数量， 最大50
     'pageHelp.pageNo': 1,
 }
+
+import logging
+import requests
+import time
+from typing import Dict, List
+
+import backoff
+import pymongo
+from ratelimit import limits, sleep_and_retry
+
+log = logging.getLogger(__name__)
 
 # resp = requests.get(url, headers=headers, params=params)
 # print(resp.json())

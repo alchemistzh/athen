@@ -2,7 +2,8 @@
   "python.pythonPath": "venv/bin/python",
   "python.autoComplete.extraPaths": [
     "${workspaceFolder}",
-    "${workspaceFolder}/scrapy_projects"
+    "${workspaceFolder}/venv/lib/python3.7/site-packages",
+    "${workspaceFolder}/venv/lib/python3.7/site-packages/requests",
   ],
   "python.formatting.provider": "yapf",
   "python.formatting.yapfPath": "${workspaceFolder}/venv/bin/yapf",

@@ -46,6 +46,7 @@ params = {
 import logging
 import requests
 import time
+from decimal import Decimal
 from typing import Dict, List
 
 import backoff
@@ -62,46 +63,41 @@ db = pymongo.MongoClient('mongodb://localhost:27017')['athen']
 COLLECTION = 'stock_profile'
 
 
-@backoff.on_exception(backoff.expo,
-                      requests.exceptions.RequestException,
-                      max_tries=5)
+# @backoff.on_exception(backoff.expo,
+#                       requests.exceptions.RequestException,
+#                       max_tries=5)
+@sleep_and_retry
+@limits(calls=1, period=0.3)
 def get_stock_list(page: int) -> List[Dict]:
     params['pageHelp.beginPage'] = page
     resp = requests.get(url, headers=headers, params=params)
     if not resp.ok:
         log.error("request failed: url=%s, response=%s", url, resp)
-        return []
+        resp.raise_for_status()
+        return None
     r = resp.json()['result']
     return [
         {
             '_id': stock['SECURITY_CODE_A'].strip(),
             'name': stock['SECURITY_ABBR_A'].strip(),
+            'shares': int(float(stock['totalShares'].strip()) * 10000),
+            'float_shares': int(float(stock['totalFlowShares'].strip()) * 10000),
         } for stock in r
     ]
 
 
+page = 1
 while True:
-    print(get_stock_list(1))
-
-
-currentPage = 1
-stock_list = []
-
-while True:
-    params['pageHelp.beginPage'] = currentPage
-    currentPage += 1
-    resp = requests.get(url, headers=headers, params=params)
-    if not resp.ok:
-        log.error("request failed: url=%s, response=%s", url, resp)
+    page += 1
+    stock_list = get_stock_list(page)
+    if not stock_list:
         break
-    r = resp.json()['result']
-    if len(r) == 0:
-        break
-    for stock in r:
-        stock_list.append({
-            '_id': stock['SECURITY_CODE_A'].strip(),
-            'name': stock['SECURITY_ABBR_A'].strip(),
-        })
-    time.sleep(0.3)
-
-db[COLLECTION].insert_many(stock_list)
+    operations = [
+        pymongo.UpdateOne(
+            {"_id": stock['_id']},
+            {'$set': stock},
+            upsert=True
+        )
+        for stock in stock_list
+    ]
+    db[COLLECTION].bulk_write(operations)

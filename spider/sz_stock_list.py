@@ -34,7 +34,6 @@ if not resp.ok:
     log.error("request failed: url=%s, response=%s", url, resp)
     exit(-1)
 
-
 db = pymongo.MongoClient('mongodb://localhost:27017')['athen']
 COLLECTION = 'stock_profile'
 operations = []

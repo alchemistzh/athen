@@ -8,7 +8,7 @@
     基金持股
 """
 
-url = 'http://f10.eastmoney.com/ShareholderResearch/ShareholderResearchAjax'
+url = 'http://f10.eastmoney.com/ShareholderResearch/ShareholderResearchAjax?code=SH600703'
 
 headers = {
     "Referer": 'http://f10.eastmoney.com/f10_v2/ShareholderResearch.aspx?code=SH600703',
@@ -22,5 +22,10 @@ params = {
 
 import requests
 
-resp = requests.get(url, headers=headers, params=params)
-print(resp.json())
+resp = requests.get(url, headers=headers)
+data = resp.json()
+
+for record in data['sdltgd']:
+    print(record['rq'])
+    for sh in record['sdltgd']:
+        print(sh['gdmc'], '\t', int(sh['cgs'].replace(',', '').strip()))

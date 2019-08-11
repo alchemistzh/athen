@@ -31,6 +31,8 @@ class Institution(Enum):
     Insurance       = '保险'
     OFII            = 'QFII'
     SocialSecurity  = '社保'
+    Securities      = '券商'
+    Other           = '其他'
 
 
 # 用于表示 十大股东 和 十大流通股东

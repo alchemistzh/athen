@@ -94,6 +94,10 @@
 
 import requests
 from collections import namedtuple
+from enum import Enum
+
+from util import parse_percent
+
 
 headers = {
     "Referer": 'http://f10.eastmoney.com/f10_v2/ShareholderResearch.aspx',
@@ -101,29 +105,89 @@ headers = {
     "X-Requested-With": 'XMLHttpRequest',
 }
 
-shareholders = namedtuple('shareholders', 'total float fund restricted')
 shareholder = namedtuple('shareholder', 'name amount proportion change')
+fund = namedtuple('fund', 'name code amount value proportion net')
+result = namedtuple('get_shareholders_result', 'total float fund restricted')
 
 
-def get_shareholders(stock_code) -> shareholders:
+class Institution(Enum):
+    Fund = '基金'
+    Insurance = '保险'
+    OFII = 'QFII'
+
+
+def get_shareholders(stock_code):
     """ 获取公司股东情况
 
-    code -- 股票代码， 上证加前缀 SH， 深证加前缀 SZ
+    stock_code -- 6位股票代码
     """
     url = 'http://f10.eastmoney.com/ShareholderResearch/ShareholderResearchAjax'
-    resp = requests.get(url, headers=headers, params={'code': stock_code})
+    code = '{}{}'.format('SH' if stock_code.startswith('6') else 'SZ', stock_code)
+    resp = requests.get(url, headers=headers, params={'code': code})
     data = resp.json()
-    floats = []
-    for record in data['sdltgd']:
-        for sh in record['sdltgd']:
-            floats.append(shareholder(
-                name=sh['gdmc'],
-                amount=int(sh['cgs'].replace(',', '').strip()),
-                proportion=sh['zltgbcgbl'],
-                change=sh['bdbl']
-            ))
-    print(floats)
-    return dict()
+
+    # 十大股东 (按日期分组)
+    top_10_total_by_date = []
+    for record_by_date in data['sdgd']:
+        shareholders = [
+            shareholder(
+                name=r['gdmc'],
+                amount=int(r['cgs'].replace(',', '').strip()),
+                proportion=parse_percent(r['zltgbcgbl']),
+                change=r['bdbl']
+            )
+            for r in record_by_date['sdgd']
+        ]
+        top_10_total_by_date.append({
+            'date': record_by_date['rq'],
+            'shareholders': shareholders
+        })
+
+    # 十大流通股东 (按日期分组)
+    top_10_float_by_date = []
+    for record_by_date in data['sdltgd']:
+        shareholders = [
+            shareholder(
+                name=r['gdmc'],
+                amount=int(r['cgs'].replace(',', '').strip()),
+                proportion=parse_percent(r['zltgbcgbl']),
+                change=r['bdbl']
+            )
+            for r in record_by_date['sdltgd']
+        ]
+        top_10_float_by_date.append({
+            'date': record_by_date['rq'],
+            'shareholders': shareholders,
+        })
+
+    # 基金持股 (按日期分组)
+    funds_by_date = []
+    for record_by_date in data['jjcg']:
+        funds = [
+            fund(
+                code=r['jjdm'],
+                name=r['jjmc'],
+                amount=int(float(r['cgs'].replace(',', '').strip())),
+                value=int(float(r['cgsz'].replace(',', '').strip())),
+                proportion=parse_percent(r['zltb']),
+                net=parse_percent(r['zjzb']),
+            )
+            for r in record_by_date['jjcg']
+        ]
+        funds_by_date.append({
+            'date': record_by_date['rq'],
+            'funds': funds,
+        })
+
+    from pprint import pprint
+    pprint(funds_by_date)
+
+    return result(
+        total=top_10_total_by_date,
+        float=top_10_float_by_date,
+        fund=funds_by_date,
+        restricted=[],
+    )
 
 
-get_shareholders('SZ300413')
+get_shareholders('300413')

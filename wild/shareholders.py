@@ -16,7 +16,7 @@ import requests
 from collections import namedtuple
 from enum import Enum
 
-from util import parse_percent, str_to_int
+from wild.util import parse_percent, str_to_int
 
 
 headers = {
@@ -27,9 +27,10 @@ headers = {
 
 
 class Institution(Enum):
-    Fund = '基金'
-    Insurance = '保险'
-    OFII = 'QFII'
+    Fund            = '基金'
+    Insurance       = '保险'
+    OFII            = 'QFII'
+    SocialSecurity  = '社保'
 
 
 # 用于表示 十大股东 和 十大流通股东
@@ -41,7 +42,7 @@ fund = namedtuple('fund', 'name code amount value proportion net')
 # 用于表示 限售解禁
 restricted = namedtuple('restricted', 'type date amount proportion')
 
-# get_shareholders 的返回值
+# 用于表示 get_shareholders 的返回值
 result = namedtuple('get_shareholders_result', 'total float fund restricted')
 
 
@@ -109,7 +110,7 @@ def get_shareholders(stock_code):
         })
 
     # 限售解禁
-    rst = [
+    restricted_ = [
         restricted(
             date=r['jjsj'],
             type=r['gplx'],
@@ -119,14 +120,11 @@ def get_shareholders(stock_code):
         for r in data['xsjj']
     ]
 
-    from pprint import pprint
-    pprint(rst)
-
     return result(
         total=top_10_total_by_date,
         float=top_10_float_by_date,
         fund=funds_by_date,
-        restricted=restricted,
+        restricted=restricted_,
     )
 
 

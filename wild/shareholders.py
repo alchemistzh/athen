@@ -9,94 +9,14 @@
     限售解禁
 
 返回数据格式:
-    {
-        "sdltgd": [ // 十大流通股东
-            {
-                "rq": "2019-03-31", // 日期
-                "sdltgd": [
-                    {
-                        "rq": "2019-03-31", // 日期
-                        "gdmc": "厦门三安电子有限公司", // 股东名称
-                        "cgs": "1,213,823,341", // 持股数
-                        "zltgbcgbl": "29.76%", // 占流通股本比例
-                        "zj": "不变", // 增减
-                        "bdbl": "--" // 变动比例
-                    },
-                ]
-            },
-        ],
-        "sdgd": [ // 十大股东
-            {
-                "rq": "2019-03-31",
-                "sdgd": [
-                    {
-                        "rq": "2019-03-31", // 日期
-                        "gdmc": "厦门三安电子有限公司", // 股东名称
-                        "cgs": "1,213,823,341", // 持股数
-                        "zltgbcgbl": "29.76%", // 占总股本比例
-                        "zj": "不变", // 增减
-                        "bdbl": "--" // 变动比例
-                    },
-                ]
-            },
-        ],
-        "jjcg": [ // 机构持股
-            {
-                "rq": "2019-06-30",
-                "jjcg": [
-                    {
-                        "jjdm": "163402", // 基金代码
-                        "jjmc": "兴全趋势投资混合(LOF)", // 基金名称
-                        "cgs": "55,254,308.00", // 持股数
-                        "cgsz": "623,268,594.24", // 市值
-                        "zzgbb": "1.35%", // 占总股本比
-                        "zltb": "1.35%", // 占流通比
-                        "zjzb": "3.41%", // 占净值比
-                    },
-                ]
-            },
-        ],
-        "sdgdcgbd": [ // 十大股东持股变动
-            {
-                "bdsj": "2019-03-26",
-                "mc": "--",
-                "gdmc": "福建三安集团有限公司",
-                "gflx": "流通A股",
-                "cgs": "255,119,092.00",
-                "zzgbcgbl": "6.26%",
-                "cj": "-19,039,000.00",
-                "cjgzygdcgbl": "-6.94%",
-                "bdyy": "临时公告"
-            },
-        ],
-        "xsjj": [ // 限售解禁
-            {
-                "jjsj": "2020-06-01", // 解禁时间
-                "jjsl": "5725.74万", // 解禁数量
-                "jjgzzgbbl": "5.47%", // 解禁股占总股本比例
-                "jjgzltgbbl": "12.04%", // 解禁股占流通股本比例
-                "gplx": "定向增发机构配售股份" // 解禁类型
-            },
-            {
-                "jjsj": "2021-07-12",
-                "jjsl": "4.99亿",
-                "jjgzzgbbl": "47.69%",
-                "jjgzltgbbl": "104.98%",
-                "gplx": "定向增发机构配售股份"
-            }
-        ],
-        "kggx": { // 控股关系
-            "sjkzr": "林秀成", // 实际控制人
-            "cgbl": "--" // 持股比例
-        }
-    }
+    见 samples/shareholders.json
 """
 
 import requests
 from collections import namedtuple
 from enum import Enum
 
-from util import parse_percent
+from util import parse_percent, str_to_int
 
 
 headers = {
@@ -105,15 +25,24 @@ headers = {
     "X-Requested-With": 'XMLHttpRequest',
 }
 
-shareholder = namedtuple('shareholder', 'name amount proportion change')
-fund = namedtuple('fund', 'name code amount value proportion net')
-result = namedtuple('get_shareholders_result', 'total float fund restricted')
-
 
 class Institution(Enum):
     Fund = '基金'
     Insurance = '保险'
     OFII = 'QFII'
+
+
+# 用于表示 十大股东 和 十大流通股东
+shareholder = namedtuple('shareholder', 'name amount proportion change')
+
+# 用于表示 基金持股
+fund = namedtuple('fund', 'name code amount value proportion net')
+
+# 用于表示 限售解禁
+restricted = namedtuple('restricted', 'type date amount proportion')
+
+# get_shareholders 的返回值
+result = namedtuple('get_shareholders_result', 'total float fund restricted')
 
 
 def get_shareholders(stock_code):
@@ -179,14 +108,25 @@ def get_shareholders(stock_code):
             'funds': funds,
         })
 
+    # 限售解禁
+    rst = [
+        restricted(
+            date=r['jjsj'],
+            type=r['gplx'],
+            amount=str_to_int(r['jjsl']),
+            proportion=parse_percent(r['jjgzzgbbl']),
+        )
+        for r in data['xsjj']
+    ]
+
     from pprint import pprint
-    pprint(funds_by_date)
+    pprint(rst)
 
     return result(
         total=top_10_total_by_date,
         float=top_10_float_by_date,
         fund=funds_by_date,
-        restricted=[],
+        restricted=restricted,
     )
 
 

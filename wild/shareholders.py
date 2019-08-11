@@ -14,7 +14,6 @@
 
 import requests
 from collections import namedtuple
-from enum import Enum
 
 from wild.util import parse_percent, str_to_int
 
@@ -24,16 +23,6 @@ headers = {
     "User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36',
     "X-Requested-With": 'XMLHttpRequest',
 }
-
-
-class Institution(Enum):
-    Fund            = '基金'
-    Insurance       = '保险'
-    OFII            = 'QFII'
-    SocialSecurity  = '社保'
-    Securities      = '券商'
-    Other           = '其他'
-
 
 # 用于表示 十大股东 和 十大流通股东
 shareholder = namedtuple('shareholder', 'name amount proportion change')

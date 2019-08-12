@@ -24,20 +24,20 @@ headers = {
     "X-Requested-With": 'XMLHttpRequest',
 }
 
-# 用于表示 十大股东 和 十大流通股东
-shareholder = namedtuple('shareholder', 'name amount proportion change')
+# 用于表示 十大股东， 十大流通股东 和 实际控制人
+shareholder = namedtuple('shareholder', ['name', 'amount', 'proportion', 'change'], defaults=[None]*4)
 
 # 用于表示 基金持股
-fund = namedtuple('fund', 'name code amount value proportion net')
+fund = namedtuple('fund', ['name', 'code', 'amount', 'value', 'proportion', 'net'])
 
 # 用于表示 限售解禁
-restricted = namedtuple('restricted', 'type date amount proportion')
+restricted = namedtuple('restricted', ['type', 'date', 'amount', 'proportion'])
 
 # 用于表示 get_shareholders 的返回值
-result = namedtuple('get_shareholders_result', 'total float fund restricted')
+result = namedtuple('get_shareholders_result', 'total float fund restricted controller main_position_date_list')
 
 
-def get_shareholders(stock_code):
+def query_shareholders(stock_code):
     """ 获取公司股东情况
 
     stock_code -- 6位股票代码
@@ -50,35 +50,35 @@ def get_shareholders(stock_code):
     # 十大股东 (按日期分组)
     top_10_total_by_date = []
     for record_by_date in data['sdgd']:
-        shareholders = [
+        holders = [
             shareholder(
                 name=r['gdmc'],
                 amount=int(r['cgs'].replace(',', '').strip()),
                 proportion=parse_percent(r['zltgbcgbl']),
-                change=r['bdbl']
+                change=parse_percent(r['bdbl'])
             )
             for r in record_by_date['sdgd']
         ]
         top_10_total_by_date.append({
             'date': record_by_date['rq'],
-            'shareholders': shareholders
+            'holders': holders
         })
 
     # 十大流通股东 (按日期分组)
     top_10_float_by_date = []
     for record_by_date in data['sdltgd']:
-        shareholders = [
+        holders = [
             shareholder(
                 name=r['gdmc'],
                 amount=int(r['cgs'].replace(',', '').strip()),
                 proportion=parse_percent(r['zltgbcgbl']),
-                change=r['bdbl']
+                change=parse_percent(r['bdbl'])
             )
             for r in record_by_date['sdltgd']
         ]
         top_10_float_by_date.append({
             'date': record_by_date['rq'],
-            'shareholders': shareholders,
+            'holders': holders,
         })
 
     # 基金持股 (按日期分组)
@@ -111,12 +111,21 @@ def get_shareholders(stock_code):
         for r in data['xsjj']
     ]
 
+    # 实际控制人
+    controller = shareholder(
+        name=data['kggx']['sjkzr'],
+        proportion=parse_percent(data['kggx']['cgbl']),
+    )
+
     return result(
         total=top_10_total_by_date,
         float=top_10_float_by_date,
         fund=funds_by_date,
         restricted=restricted_,
+        controller=controller,
+        main_position_date_list=data['zlcc_rz']  # 主力持仓日期列表,
     )
 
 
-get_shareholders('300413')
+if __name__ == '__main__':
+    query_shareholders('300413')

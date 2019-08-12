@@ -24,78 +24,67 @@ Query stock list from sse.com.cn and save to MongoDB.
 }
 """
 
-url = 'http://query.sse.com.cn/security/stock/getStockListData.do'
-
-headers = {
-    'Referer': 'http://www.sse.com.cn/assortment/stock/list/share/',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
-}
-
-params = {
-    'isPagination': 'true',
-    'stockCode': '',
-    'csrcCode': '',
-    'areaName': '',
-    'stockType': 1,  # 1: 主板A股  2: B股  8: 科创板
-    'pageHelp.cacheSize': 1,
-    'pageHelp.beginPage': 1,  # 页数， 每次请求递增
-    'pageHelp.pageSize': 50,  # 每次请求返回的股票数量， 最大50
-    'pageHelp.pageNo': 1,
-}
-
 import logging
 import requests
+from collections import namedtuple
 from typing import Dict, List
 
-import backoff
-import pymongo
 from ratelimit import limits, sleep_and_retry
 
 log = logging.getLogger(__name__)
 
-# resp = requests.get(url, headers=headers, params=params)
-# print(resp.json())
-# exit(0)
+stock = namedtuple('stock',
+    [
+        'code',          # 6位代码
+        'name',          # 简称
+        'shares',        # 总股本
+        'float_shares',  # 流通股本
+    ]
+)
 
-db = pymongo.MongoClient('mongodb://localhost:27017')['athen']
-COLLECTION = 'stock_profile'
+STOCK_TYPE_A = 1
+STOCK_TYPE_KCB = 8
 
-
-# @backoff.on_exception(backoff.expo,
-#                       requests.exceptions.RequestException,
-#                       max_tries=5)
 @sleep_and_retry
-@limits(calls=1, period=0.3)
-def get_stock_list(page: int) -> List[Dict]:
-    params['pageHelp.beginPage'] = page
+@limits(calls=1, period=0.2)
+def get_stock_list_by_page(page: int) -> List[stock]:
+    url = 'http://query.sse.com.cn/security/stock/getStockListData.do'
+    headers = {
+        'Referer': 'http://www.sse.com.cn/assortment/stock/list/share/',  # 必须有 Referer， 否则调用非法
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
+    }
+    params = {
+        'isPagination': 'true',
+        'stockCode': '',
+        'csrcCode': '',
+        'areaName': '',
+        'stockType': 1,  # 1: 主板A股  2: B股  8: 科创板
+        'pageHelp.cacheSize': 1,
+        'pageHelp.beginPage': page,  # 页数， 每次请求递增
+        'pageHelp.pageSize': 50,  # 每次请求返回的股票数量， 最大50
+        'pageHelp.pageNo': 1,
+    }
     resp = requests.get(url, headers=headers, params=params)
     if not resp.ok:
         log.error("request failed: url=%s, response=%s", url, resp)
         resp.raise_for_status()
         return None
-    r = resp.json()['result']
+    result = resp.json()['result']
     return [
-        {
-            '_id': stock['SECURITY_CODE_A'].strip(),
-            'name': stock['SECURITY_ABBR_A'].strip(),
-            'shares': int(float(stock['totalShares'].strip()) * 10000),
-            'float_shares': int(float(stock['totalFlowShares'].strip()) * 10000),
-        } for stock in r
+        stock(
+            code=r['SECURITY_CODE_A'].strip(),
+            name=r['SECURITY_ABBR_A'].strip(),
+            shares=int(float(r['totalShares'].strip()) * 10000),
+            float_shares=int(float(r['totalFlowShares'].strip()) * 10000)
+        )
+        for r in result
     ]
 
 
 page = 1
 while True:
     page += 1
-    stock_list = get_stock_list(page)
+    stock_list = get_stock_list_by_page(page)
     if not stock_list:
         break
-    operations = [
-        pymongo.UpdateOne(
-            {'_id': stock['_id']},
-            {'$set': stock},
-            upsert=True
-        )
-        for stock in stock_list
-    ]
-    db[COLLECTION].bulk_write(operations)
+    print([s.code for s in stock_list])

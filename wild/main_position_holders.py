@@ -19,4 +19,5 @@ class Institution(Enum):
     OFII            = 'QFII'
     SocialSecurity  = '社保'
     Securities      = '券商'
+    Trust           = '信托'
     Other           = '其他'

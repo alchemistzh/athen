@@ -24,7 +24,6 @@ def parse_number(s: str):
     Convert string to number:
         '21.62亿' --> 21.62 * 10^8
         '3215万' --> 3215 * 10^5
-        '18.6%' --> 0.186
     """
 
     # TODO: Check regex match numbers: \-?[0-9]*(\.[0-9]*)?
@@ -43,6 +42,13 @@ def str_to_int(s):
 def str_to_float(s):
     num = parse_number(s)
     return float(num) if num is not None else None
+
+
+def number_or_zero(data, conv, zero=0):
+    try:
+        return conv(data)
+    except:
+        return zero
 
 
 if __name__ == '__main__':

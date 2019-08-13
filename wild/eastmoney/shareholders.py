@@ -25,16 +25,16 @@ headers = {
 }
 
 # 用于表示 十大股东， 十大流通股东 和 实际控制人
-shareholder = namedtuple('shareholder', ['name', 'amount', 'proportion', 'change'], defaults=[None]*4)
+Shareholder = namedtuple('Shareholder', ['name', 'amount', 'proportion', 'change'], defaults=[None]*4)
 
 # 用于表示 基金持股
-fund = namedtuple('fund', ['name', 'code', 'amount', 'value', 'proportion', 'net'])
+Fund = namedtuple('Fund', ['name', 'code', 'amount', 'value', 'proportion', 'net'])
 
 # 用于表示 限售解禁
-restricted = namedtuple('restricted', ['type', 'date', 'amount', 'proportion'])
+Restricted = namedtuple('Restricted', ['type', 'date', 'amount', 'proportion'])
 
-# 用于表示 get_shareholders 的返回值
-result = namedtuple('get_shareholders_result', 'total float fund restricted controller main_position_date_list')
+# 用于表示 query_shareholders 的返回值
+Result = namedtuple('query_shareholders_Result', 'total float fund restricted controller main_position_date_list')
 
 
 def query_shareholders(stock_code):
@@ -51,7 +51,7 @@ def query_shareholders(stock_code):
     top_10_total_by_date = []
     for record_by_date in data['sdgd']:
         holders = [
-            shareholder(
+            Shareholder(
                 name=r['gdmc'],
                 amount=int(r['cgs'].replace(',', '').strip()),
                 proportion=parse_percent(r['zltgbcgbl']),
@@ -68,7 +68,7 @@ def query_shareholders(stock_code):
     top_10_float_by_date = []
     for record_by_date in data['sdltgd']:
         holders = [
-            shareholder(
+            Shareholder(
                 name=r['gdmc'],
                 amount=int(r['cgs'].replace(',', '').strip()),
                 proportion=parse_percent(r['zltgbcgbl']),
@@ -85,7 +85,7 @@ def query_shareholders(stock_code):
     funds_by_date = []
     for record_by_date in data['jjcg']:
         funds = [
-            fund(
+            Fund(
                 code=r['jjdm'],
                 name=r['jjmc'],
                 amount=int(float(r['cgs'].replace(',', '').strip())),
@@ -102,7 +102,7 @@ def query_shareholders(stock_code):
 
     # 限售解禁
     restricted_ = [
-        restricted(
+        Restricted(
             date=r['jjsj'],
             type=r['gplx'],
             amount=str_to_int(r['jjsl']),
@@ -112,12 +112,12 @@ def query_shareholders(stock_code):
     ]
 
     # 实际控制人
-    controller = shareholder(
+    controller = Shareholder(
         name=data['kggx']['sjkzr'],
         proportion=parse_percent(data['kggx']['cgbl']),
     )
 
-    return result(
+    return Result(
         total=top_10_total_by_date,
         float=top_10_float_by_date,
         fund=funds_by_date,
@@ -128,4 +128,4 @@ def query_shareholders(stock_code):
 
 
 if __name__ == '__main__':
-    query_shareholders('300413')
+    print(query_shareholders('300413'))

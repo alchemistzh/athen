@@ -29,7 +29,7 @@ class InstitutionType(Enum):
     Other           = '其他机构'
 
 
-main_position = namedtuple('main_position', [
+MainPosition = namedtuple('MainPosition', [
     'type',       # 机构类型
     'number',     # 机构家数
     'amount',     # 持仓股数
@@ -51,7 +51,7 @@ def get_main_positions(stock_code, date) -> List:
     resp = requests.get(url, params=params)
     data = resp.json()
     main_positions = [
-        main_position(
+        MainPosition(
             type=r['jglx'],
             number=0 if r['ccjs'] == '--' else int(r['ccjs']),
             amount=0 if r['ccgs'] == '--' else int(r['ccgs']),

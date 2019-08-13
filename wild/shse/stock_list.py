@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Query stock list from sse.com.cn and save to MongoDB.
+Query stock list from sse.com.cn.
 
 返回数据格式：
 {

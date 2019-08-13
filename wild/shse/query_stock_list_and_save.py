@@ -9,7 +9,7 @@ from datetime import datetime
 
 import pymongo
 
-from stock_list import get_stock_list
+from wild.shse.stock_list import get_stock_list
 
 
 db = pymongo.MongoClient('mongodb://localhost:27017')['athen']

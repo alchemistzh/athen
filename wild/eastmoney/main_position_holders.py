@@ -2,7 +2,10 @@
 # coding: utf-8
 
 """
-调用 <东方财富> web 接口获取股票主力持仓情况
+调用 <东方财富> web 接口获取股票主力持仓情况 (各类机构的持仓比例)
+
+返回数据格式:
+    见 samples/main_position_holders.json
 """
 
 import requests

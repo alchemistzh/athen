@@ -74,8 +74,8 @@ def get_stock_list_by_page(page: int) -> List[stock]:
         stock(
             code=r['SECURITY_CODE_A'].strip(),
             name=r['SECURITY_ABBR_A'].strip(),
-            shares=int(float(r['totalShares'].strip()) * 10000),
-            float_shares=int(float(r['totalFlowShares'].strip()) * 10000)
+            shares=int(float(r['totalShares'].strip()) * 10000) if 'totalShares' in r else None,
+            float_shares=int(float(r['totalFlowShares'].strip()) * 10000) if 'totalFlowShares' in r else None
         )
         for r in result
     ]

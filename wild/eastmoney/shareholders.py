@@ -17,13 +17,6 @@ from collections import namedtuple
 
 from wild.util import parse_percent, str_to_int
 
-
-headers = {
-    "Referer": 'http://f10.eastmoney.com/f10_v2/ShareholderResearch.aspx',
-    "User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36',
-    "X-Requested-With": 'XMLHttpRequest',
-}
-
 # 用于表示 十大股东， 十大流通股东 和 实际控制人
 Shareholder = namedtuple('Shareholder', ['name', 'amount', 'proportion', 'change'], defaults=[None]*4)
 
@@ -43,6 +36,11 @@ def query_shareholders(stock_code):
     stock_code -- 6 位股票代码
     """
     url = 'http://f10.eastmoney.com/ShareholderResearch/ShareholderResearchAjax'
+    headers = {
+        "Referer": 'http://f10.eastmoney.com/f10_v2/ShareholderResearch.aspx',
+        "User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36',
+        "X-Requested-With": 'XMLHttpRequest',
+    }
     code = '{}{}'.format('SH' if stock_code.startswith('6') else 'SZ', stock_code)
     resp = requests.get(url, headers=headers, params={'code': code})
     data = resp.json()

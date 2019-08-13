@@ -40,7 +40,7 @@ result = namedtuple('get_shareholders_result', 'total float fund restricted cont
 def query_shareholders(stock_code):
     """ 获取公司股东情况
 
-    stock_code -- 6位股票代码
+    stock_code -- 6 位股票代码
     """
     url = 'http://f10.eastmoney.com/ShareholderResearch/ShareholderResearchAjax'
     code = '{}{}'.format('SH' if stock_code.startswith('6') else 'SZ', stock_code)

@@ -35,7 +35,7 @@ log = logging.getLogger(__name__)
 
 stock = namedtuple('stock',
     [
-        'code',          # 6位代码
+        'code',          # 6 位代码
         'name',          # 简称
         'shares',        # 总股本
         'float_shares',  # 流通股本
@@ -82,6 +82,9 @@ def get_stock_list_by_page(page: int) -> List[stock]:
 
 
 def get_stock_list() -> List[stock]:
+    """
+    循环调用 get_stock_list_by_page 获取全部股票列表
+    """
     page = 1
     stock_list = []
     while True:

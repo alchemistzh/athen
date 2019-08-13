@@ -42,7 +42,7 @@ stock = namedtuple('stock',
     ]
 )
 
-STOCK_TYPE_A = 1
+STOCK_TYPE_MAIN = 1
 STOCK_TYPE_KCB = 8
 
 @sleep_and_retry
@@ -66,7 +66,7 @@ def get_stock_list_by_page(page: int) -> List[stock]:
     }
     resp = requests.get(url, headers=headers, params=params)
     if not resp.ok:
-        log.error("request failed: url=%s, response=%s", url, resp)
+        log.error('request failed: url=%s, response=%s', url, resp)
         resp.raise_for_status()
         return None
     result = resp.json()['result']
@@ -81,10 +81,18 @@ def get_stock_list_by_page(page: int) -> List[stock]:
     ]
 
 
-page = 1
-while True:
-    page += 1
-    stock_list = get_stock_list_by_page(page)
-    if not stock_list:
-        break
+def get_stock_list() -> List[stock]:
+    page = 1
+    stock_list = []
+    while True:
+        p = get_stock_list_by_page(page)
+        if not p:
+            break
+        page += 1
+        stock_list.extend(p)
+    return stock_list
+
+
+if __name__ == '__main__':
+    stock_list = get_stock_list()
     print([s.code for s in stock_list])

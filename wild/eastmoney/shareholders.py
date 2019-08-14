@@ -18,10 +18,22 @@ from collections import namedtuple
 from wild.util import parse_percent, str_to_int
 
 # 用于表示 十大股东， 十大流通股东 和 实际控制人
-Shareholder = namedtuple('Shareholder', ['name', 'amount', 'proportion', 'change'], defaults=[None]*4)
+Shareholder = namedtuple('Shareholder', [
+    'name',        # 股东名称
+    'amount',      # 持股数量
+    'proportion',  # 持股占流通股比例
+    'change'       # 持股变化
+], defaults=[None]*4)
 
 # 用于表示 基金持股
-Fund = namedtuple('Fund', ['name', 'code', 'amount', 'value', 'proportion', 'net'])
+Fund = namedtuple('Fund', [
+    'name',        # 基金名称
+    'code',        # 基金代码
+    'amount',      # 持股数量
+    'value',       # 持股市值
+    'proportion',  # 占流通股比例
+    'net'          # 占基金净值比例
+])
 
 # 用于表示 限售解禁
 Restricted = namedtuple('Restricted', ['type', 'date', 'amount', 'proportion'])
@@ -30,7 +42,7 @@ Restricted = namedtuple('Restricted', ['type', 'date', 'amount', 'proportion'])
 Result = namedtuple('query_shareholders_Result', 'total float fund restricted controller main_position_date_list')
 
 
-def query_shareholders(stock_code):
+def query_shareholders(stock_code) -> Result:
     """ 获取公司股东情况
 
     stock_code -- 6 位股票代码

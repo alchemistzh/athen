@@ -2,10 +2,10 @@
 # coding: utf-8
 
 """
-调用 <东方财富> web 接口获取股票主力持仓情况 (各类机构的持仓比例)
+调用 <东方财富> web 接口获取一直股票的机构持仓情况 (各类机构的持仓比例)
 
 返回数据格式:
-    见 samples/main_position_holders.json
+    见 samples/main_positions.json
 """
 
 import requests
@@ -29,19 +29,20 @@ class InstitutionType(Enum):
     Other           = '其他机构'
 
 
+# 主力持仓情况
 MainPosition = namedtuple('MainPosition', [
     'type',       # 机构类型
     'number',     # 机构家数
-    'amount',     # 持仓股数
+    'amount',     # 持股数量
     'proportion'  # 占流通股本比例
 ])
 
 
-def get_main_positions(stock_code, date) -> List:
-    """ 获取主力机构持仓情况
+def get_main_positions(stock_code, date) -> List[MainPosition]:
+    """ 获取机构持仓情况
 
     stock_code -- 6 位股票代码
-    date       -- 日期
+    date       -- 截止日期
     """
     url = 'http://f10.eastmoney.com/ShareholderResearch/MainPositionsHodlerAjax'
     params = {

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-调用 <东方财富> web 接口获取一直股票的机构持仓情况 (各类机构的持仓比例)
+调用 <东方财富> web 接口获取一只股票的机构持仓情况 (各类机构的持仓比例)
 
 返回数据格式:
     见 samples/main_positions.json
@@ -29,7 +29,7 @@ class InstitutionType(Enum):
     Other           = '其他机构'
 
 
-# 主力持仓情况
+# 机构持仓情况
 MainPosition = namedtuple('MainPosition', [
     'type',       # 机构类型
     'number',     # 机构家数

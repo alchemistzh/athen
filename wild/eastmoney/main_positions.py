@@ -38,7 +38,7 @@ MainPosition = namedtuple('MainPosition', [
 
 
 def get_main_positions(stock_code, date) -> List:
-    """ 获取股票机构持仓情况
+    """ 获取主力机构持仓情况
 
     stock_code -- 6 位股票代码
     date       -- 日期

@@ -36,10 +36,22 @@ Fund = namedtuple('Fund', [
 ])
 
 # 用于表示 限售解禁
-Restricted = namedtuple('Restricted', ['type', 'date', 'amount', 'proportion'])
+Restricted = namedtuple('Restricted', [
+    'type',       # 解禁类型
+    'date',       # 解禁时间
+    'amount',     # 解禁数量
+    'proportion'  # 解禁股占总股本比例
+])
 
 # 用于表示 query_shareholders 的返回值
-Result = namedtuple('query_shareholders_Result', 'total float fund restricted controller main_position_date_list')
+Result = namedtuple('query_shareholders_Result', [
+    'total',                   # 十大股东
+    'float',                   # 十大流通股东
+    'fund',                    # 基金持股
+    'restricted',              # 限售解禁
+    'controller',              # 实际控制人
+    'main_position_date_list'  # 主力持仓日期列表
+])
 
 
 def query_shareholders(stock_code) -> Result:

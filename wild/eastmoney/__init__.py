@@ -3,4 +3,4 @@
 
 
 from .main_positions import get_main_positions
-from .shareholders import query_shareholders
+from .shareholders import get_shareholders

@@ -43,7 +43,7 @@ Restricted = namedtuple('Restricted', [
     'proportion'  # 解禁股占总股本比例
 ])
 
-# 用于表示 query_shareholders 的返回值
+# 用于表示 get_shareholders 的返回值
 Result = namedtuple('query_shareholders_Result', [
     'total',                   # 十大股东
     'float',                   # 十大流通股东
@@ -54,7 +54,7 @@ Result = namedtuple('query_shareholders_Result', [
 ])
 
 
-def query_shareholders(stock_code) -> Result:
+def get_shareholders(stock_code) -> Result:
     """ 获取公司股东情况
 
     stock_code -- 6 位股票代码
@@ -150,4 +150,4 @@ def query_shareholders(stock_code) -> Result:
 
 
 if __name__ == '__main__':
-    print(query_shareholders('300413'))
+    print(get_shareholders('300413'))

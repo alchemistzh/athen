@@ -15,17 +15,46 @@ db = pymongo.MongoClient('mongodb://localhost:27017')['athen']
 stock_profiles = db['stock_profile'].find({})
 col_shareholder = db['shareholder']
 
-for sp in stock_profiles:
+failed_codes = [
+    '603121',
+    '603236',
+    '603256',
+    '603279',
+    '603332',
+    '603530',
+    '603613',
+    '603687',
+    '603697',
+    '603739',
+    '603983',
+    '002947',
+    '002953',
+    '002956',
+    '002957',
+    '002966',
+    '300758',
+    '300763',
+    '300769',
+    '300778',
+    '300783',
+    '300785',
+    '300786',
+    '603115',
+    '603662',
+    '002960'
+]
+
+for code in failed_codes:
     try:
-        shareholders = shareholder_research(sp['_id'])
+        shareholders = shareholder_research(code)
         shareholders['update_time'] = datetime.now()
         col_shareholder.update_one(
-            {'_id': sp['_id']},
+            {'_id': code},
             {'$set': shareholders},
             upsert=True
         )
     except Exception as e:
-        logging.warning(sp['_id'], e)
+        logging.warning(code, e)
         continue
 
     time.sleep(0.3)

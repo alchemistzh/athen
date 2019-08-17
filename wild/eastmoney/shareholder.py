@@ -17,7 +17,7 @@ from collections import namedtuple
 
 from wild.util import parse_percent, str_to_int
 
-# 用于表示 十大股东， 十大流通股东 和 实际控制人
+# 十大股东， 十大流通股东 和 实际控制人
 Shareholder = namedtuple('Shareholder', [
     'name',           # 股东名称
     'amount',         # 持股数量
@@ -26,7 +26,7 @@ Shareholder = namedtuple('Shareholder', [
     'change_percent'  # 持股变化比例
 ], defaults=[None]*5)
 
-# 用于表示 基金持股
+# 基金持股
 Fund = namedtuple('Fund', [
     'name',        # 基金名称
     'code',        # 基金代码
@@ -36,7 +36,7 @@ Fund = namedtuple('Fund', [
     'net'          # 占基金净值比例
 ])
 
-# 用于表示 限售解禁
+# 限售解禁
 Restricted = namedtuple('Restricted', [
     'type',       # 解禁类型
     'date',       # 解禁时间
@@ -75,7 +75,7 @@ def shareholder_research(stock_code):
     # 十大股东
     for sdgd in data['sdgd']:
         shareholders = [
-            Shareholder(
+            dict(
                 name=i['gdmc'],
                 amount=int(i['cgs'].replace(',', '').strip()),
                 proportion=parse_percent(i['zltgbcgbl']),
@@ -89,7 +89,7 @@ def shareholder_research(stock_code):
     # 十大流通股东
     for sdltgd in data['sdltgd']:
         shareholders = [
-            Shareholder(
+            dict(
                 name=i['gdmc'],
                 amount=int(i['cgs'].replace(',', '').strip()),
                 proportion=parse_percent(i['zltgbcgbl']),
@@ -101,33 +101,37 @@ def shareholder_research(stock_code):
         result.setdefault(sdltgd['rq'], {})['float'] = shareholders
 
     # 基金持股
-    for jjcg in data['jjcg']:
-        funds = [
-            Fund(
-                code=i['jjdm'],
-                name=i['jjmc'],
-                amount=int(float(i['cgs'].replace(',', '').strip())),
-                value=int(float(i['cgsz'].replace(',', '').strip())),
-                proportion=parse_percent(i['zltb']),
-                net=parse_percent(i['zjzb']),
-            )
-            for i in jjcg['jjcg']
-        ]
-        result.setdefault(jjcg['rq'], {})['funds'] = funds
+    data_jjcg = data.get('jjcg', [])
+    if data_jjcg:
+        for jjcg in data_jjcg:
+            funds = [
+                dict(
+                    code=i['jjdm'],
+                    name=i['jjmc'],
+                    amount=int(float(i['cgs'].replace(',', '').strip())),
+                    value=int(float(i['cgsz'].replace(',', '').strip())),
+                    proportion=parse_percent(i['zltb']),
+                    net=parse_percent(i['zjzb']),
+                )
+                for i in jjcg['jjcg']
+            ]
+            result.setdefault(jjcg['rq'], {})['funds'] = funds
 
     # 限售解禁
-    result['restricted'] = [
-        Restricted(
-            date=i['jjsj'],
-            type=i['gplx'],
-            amount=str_to_int(i['jjsl']),
-            proportion=parse_percent(i['jjgzzgbbl']),
-        )
-        for i in data['xsjj']
-    ]
+    data_xxjj = data.get('xsjj', [])
+    if data_xxjj:
+        result['restricted'] = [
+            dict(
+                date=i['jjsj'],
+                type=i['gplx'],
+                amount=str_to_int(i['jjsl']),
+                proportion=parse_percent(i['jjgzzgbbl']),
+            )
+            for i in data.get('xsjj', [])
+        ]
 
     # 实际控制人
-    result['controller'] = Shareholder(
+    result['controller'] = dict(
         name=data['kggx']['sjkzr'],
         proportion=parse_percent(data['kggx']['cgbl']),
     )

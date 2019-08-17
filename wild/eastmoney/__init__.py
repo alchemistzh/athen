@@ -2,5 +2,5 @@
 # coding: utf-8
 
 
-from .main_positions import get_main_positions
-from .shareholders import get_shareholders
+from .main_position import get_main_positions
+from .shareholder import shareholder_research

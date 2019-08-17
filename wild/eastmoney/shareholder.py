@@ -19,11 +19,12 @@ from wild.util import parse_percent, str_to_int
 
 # 用于表示 十大股东， 十大流通股东 和 实际控制人
 Shareholder = namedtuple('Shareholder', [
-    'name',        # 股东名称
-    'amount',      # 持股数量
-    'proportion',  # 持股占流通股比例
-    'change'       # 持股变化
-], defaults=[None]*4)
+    'name',           # 股东名称
+    'amount',         # 持股数量
+    'proportion',     # 持股占流通股比例
+    'change',         # 持股变化状态 ("不变", "新进", 或增减数量, 如 "222万")
+    'change_percent'  # 持股变化比例
+], defaults=[None]*5)
 
 # 用于表示 基金持股
 Fund = namedtuple('Fund', [
@@ -43,19 +44,19 @@ Restricted = namedtuple('Restricted', [
     'proportion'  # 解禁股占总股本比例
 ])
 
-# 用于表示 get_shareholders 的返回值
-Result = namedtuple('query_shareholders_Result', [
-    'total',                   # 十大股东
-    'float',                   # 十大流通股东
-    'fund',                    # 基金持股
-    'restricted',              # 限售解禁
-    'controller',              # 实际控制人
-    'main_position_date_list'  # 主力持仓日期列表
-])
+# 用于表示截止某一日期的股东情况
+# ShareholderResearch = namedtuple('ShareholderResearch', [
+#     'total',                   # 十大股东
+#     'float',                   # 十大流通股东
+#     'fund',                    # 基金持股
+#     'restricted',              # 限售解禁
+#     'controller',              # 实际控制人
+#     'main_position_date_list'  # 主力持仓日期列表
+# ], defaults=[None]*6)
 
 
-def get_shareholders(stock_code) -> Result:
-    """ 获取公司股东情况
+def shareholder_research(stock_code):
+    """ 股东研究
 
     stock_code -- 6 位股票代码
     """
@@ -69,85 +70,76 @@ def get_shareholders(stock_code) -> Result:
     resp = requests.get(url, headers=headers, params={'code': code})
     data = resp.json()
 
-    # 十大股东 (按日期分组)
-    top_10_total_by_date = []
-    for record_by_date in data['sdgd']:
-        holders = [
-            Shareholder(
-                name=r['gdmc'],
-                amount=int(r['cgs'].replace(',', '').strip()),
-                proportion=parse_percent(r['zltgbcgbl']),
-                change=parse_percent(r['bdbl'])
-            )
-            for r in record_by_date['sdgd']
-        ]
-        top_10_total_by_date.append({
-            'date': record_by_date['rq'],
-            'holders': holders
-        })
+    result = {}
 
-    # 十大流通股东 (按日期分组)
-    top_10_float_by_date = []
-    for record_by_date in data['sdltgd']:
-        holders = [
+    # 十大股东
+    for sdgd in data['sdgd']:
+        shareholders = [
             Shareholder(
-                name=r['gdmc'],
-                amount=int(r['cgs'].replace(',', '').strip()),
-                proportion=parse_percent(r['zltgbcgbl']),
-                change=parse_percent(r['bdbl'])
+                name=i['gdmc'],
+                amount=int(i['cgs'].replace(',', '').strip()),
+                proportion=parse_percent(i['zltgbcgbl']),
+                change=i['zj'],
+                change_percent=parse_percent(i['bdbl'])
             )
-            for r in record_by_date['sdltgd']
+            for i in sdgd['sdgd']
         ]
-        top_10_float_by_date.append({
-            'date': record_by_date['rq'],
-            'holders': holders,
-        })
+        result.setdefault(sdgd['rq'], {})['total'] = shareholders
 
-    # 基金持股 (按日期分组)
-    funds_by_date = []
-    for record_by_date in data['jjcg']:
+    # 十大流通股东
+    for sdltgd in data['sdltgd']:
+        shareholders = [
+            Shareholder(
+                name=i['gdmc'],
+                amount=int(i['cgs'].replace(',', '').strip()),
+                proportion=parse_percent(i['zltgbcgbl']),
+                change=i['zj'],
+                change_percent=parse_percent(i['bdbl'])
+            )
+            for i in sdltgd['sdltgd']
+        ]
+        result.setdefault(sdltgd['rq'], {})['float'] = shareholders
+
+    # 基金持股
+    for jjcg in data['jjcg']:
         funds = [
             Fund(
-                code=r['jjdm'],
-                name=r['jjmc'],
-                amount=int(float(r['cgs'].replace(',', '').strip())),
-                value=int(float(r['cgsz'].replace(',', '').strip())),
-                proportion=parse_percent(r['zltb']),
-                net=parse_percent(r['zjzb']),
+                code=i['jjdm'],
+                name=i['jjmc'],
+                amount=int(float(i['cgs'].replace(',', '').strip())),
+                value=int(float(i['cgsz'].replace(',', '').strip())),
+                proportion=parse_percent(i['zltb']),
+                net=parse_percent(i['zjzb']),
             )
-            for r in record_by_date['jjcg']
+            for i in jjcg['jjcg']
         ]
-        funds_by_date.append({
-            'date': record_by_date['rq'],
-            'funds': funds,
-        })
+        result.setdefault(jjcg['rq'], {})['funds'] = funds
 
     # 限售解禁
-    restricted_ = [
+    result['restricted'] = [
         Restricted(
-            date=r['jjsj'],
-            type=r['gplx'],
-            amount=str_to_int(r['jjsl']),
-            proportion=parse_percent(r['jjgzzgbbl']),
+            date=i['jjsj'],
+            type=i['gplx'],
+            amount=str_to_int(i['jjsl']),
+            proportion=parse_percent(i['jjgzzgbbl']),
         )
-        for r in data['xsjj']
+        for i in data['xsjj']
     ]
 
     # 实际控制人
-    controller = Shareholder(
+    result['controller'] = Shareholder(
         name=data['kggx']['sjkzr'],
         proportion=parse_percent(data['kggx']['cgbl']),
     )
 
-    return Result(
-        total=top_10_total_by_date,
-        float=top_10_float_by_date,
-        fund=funds_by_date,
-        restricted=restricted_,
-        controller=controller,
-        main_position_date_list=data['zlcc_rz']  # 主力持仓日期列表,
-    )
+    # 主力持仓日期列表
+    result['main_position_date_list']=data['zlcc_rz']
+
+    return result
 
 
 if __name__ == '__main__':
-    print(get_shareholders('300413'))
+    sr = shareholder_research('300753')
+    from pprint import pprint
+    pprint(sr['2019-06-30']['float'])
+    pprint(sr['2019-06-30']['funds'])

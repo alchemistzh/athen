@@ -9,3 +9,5 @@ DB_ATHEN = 'athen'
 db = pymongo.MongoClient(URI)[DB_ATHEN]
 
 col_stock_profile = db['stock_profile']
+col_shareholder = db['shareholder']
+col_subject = db['subject']

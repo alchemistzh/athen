@@ -19,7 +19,7 @@ operations = [
         {'_id': stock.code},
         {'$set': {
             'name': stock.name,
-            'total_shares': stock.shares,
+            'total_shares': stock.total_shares,
             'float_shares': stock.float_shares,
             'update_time': datetime.now(),
         }},

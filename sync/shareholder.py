@@ -8,23 +8,22 @@ from datetime import datetime
 import pymongo
 
 from wild.eastmoney import shareholder_research, get_main_positions
+from .mongodb import col_stock_profile, col_shareholder
 
 
-db = pymongo.MongoClient('mongodb://localhost:27017')['athen']
-stock_profiles = db['stock_profile'].find({})
-col_shareholder = db['shareholder']
-
-for sp in stock_profiles:
+stock_profile_docs = col_stock_profile.find(projection=['name'])
+for d in stock_profile_docs:
     try:
-        shareholders = shareholder_research(sp['_id'])
+        shareholders = shareholder_research(d['_id'])
+        shareholders['name'] = d['name']
         shareholders['update_time'] = datetime.now()
         col_shareholder.update_one(
-            {'_id': sp['_id']},
+            {'_id': d['_id']},
             {'$set': shareholders},
             upsert=True
         )
     except Exception as e:
-        logging.warning(sp['_id'], e)
+        logging.warning(d['_id'], e)
         continue
 
     time.sleep(0.3)

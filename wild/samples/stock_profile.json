@@ -11,19 +11,19 @@
             "code": "600739",
             "name": "辽宁成大",
             "exchange": "SH",
-            "float_market_capital": 2.0880538988E10, // 流通市值
             "market_capital": 2.0880538988E10, // 总市值
-            "pb": 0.991, // 市净率：0.99
+            "float_market_capital": 2.0880538988E10, // 流通市值
+            "pb": 0.991, // 市净率
             "pe_lyr": 27.409, // 市盈率(静)
             "pe_ttm": 16.961, // 市盈率(TTM)
             "pe_forecast": 8.479, // 市盈率(动)
             "navps": 13.78, // 每股净资产
             "eps": 0.805, // 每股收益
             "dividend_yield": 1.319, // 股息率
+            "total_shares": 1529709816, // 总股本
+            "float_shares": 1529709816, // 流通股
             "high52w": 15.89, // 52周最高
             "low52w": 9.6, // 52周最低
-            "float_shares": 1529709816, // 流通股
-            "total_shares": 1529709816, // 总股本
             "avg_price": 13.641,
             "delayed": 0,
             "type": 11,

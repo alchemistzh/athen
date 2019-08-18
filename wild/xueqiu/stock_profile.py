@@ -3,6 +3,9 @@
 
 """
 雪球个股首页报价信息接口
+
+返回数据格式:
+    见 samples/stock_profile.json
 """
 
 import sys

@@ -1,0 +1,79 @@
+{
+    "data": {
+        "market": {
+            "status_id": 8,
+            "region": "CN",
+            "status": "休市",
+            "time_zone": "Asia/Shanghai"
+        },
+        "quote": {
+            "symbol": "SH600739",
+            "code": "600739",
+            "name": "辽宁成大",
+            "exchange": "SH",
+            "float_market_capital": 2.0880538988E10, // 流通市值
+            "market_capital": 2.0880538988E10, // 总市值
+            "pb": 0.991, // 市净率：0.99
+            "pe_lyr": 27.409, // 市盈率(静)
+            "pe_ttm": 16.961, // 市盈率(TTM)
+            "pe_forecast": 8.479, // 市盈率(动)
+            "navps": 13.78, // 每股净资产
+            "eps": 0.805, // 每股收益
+            "dividend_yield": 1.319, // 股息率
+            "high52w": 15.89, // 52周最高
+            "low52w": 9.6, // 52周最低
+            "float_shares": 1529709816, // 流通股
+            "total_shares": 1529709816, // 总股本
+            "avg_price": 13.641,
+            "delayed": 0,
+            "type": 11,
+            "percent": 1.56,
+            "tick_size": 0.01,
+            "limit_down": 12.1,
+            "amplitude": 2.53,
+            "current": 13.65,
+            "high": 13.77,
+            "current_year_percent": 30.5,
+            "issue_date": 840384000000,
+            "low": 13.43,
+            "sub_type": "ASH",
+            "dividend": 0.18,
+            "currency": "CNY",
+            "lot_size": 100,
+            "lock_set": null,
+            "profit": 7.6182478762E8,
+            "timestamp": 1565938800000,
+            "amount": 9.357081E7,
+            "chg": 0.21,
+            "last_close": 13.44,
+            "profit_four": 1.2311179581E9,
+            "volume": 6859508,
+            "volume_ratio": 1.53,
+            "profit_forecast": 2.462708156E9,
+            "limit_up": 14.78,
+            "turnover_rate": 0.45,
+            "time": 1565938800000,
+            "open": 13.46,
+            "status": 1
+        },
+        "others": {
+            "pankou_ratio": 57.59
+        },
+        "tags": [
+            {
+                "description": "沪股通",
+                "value": 1
+            },
+            {
+                "description": "融",
+                "value": 6
+            },
+            {
+                "description": "空",
+                "value": 7
+            }
+        ]
+    },
+    "error_code": 0,
+    "error_description": ""
+}

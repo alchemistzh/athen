@@ -37,7 +37,7 @@ stock = namedtuple('stock',
     [
         'code',          # 6 位代码
         'name',          # 简称
-        'shares',        # 总股本
+        'total_shares',  # 总股本
         'float_shares',  # 流通股本
     ]
 )
@@ -74,7 +74,7 @@ def get_stock_list_by_page(page: int) -> List[stock]:
         stock(
             code=r['SECURITY_CODE_A'].strip(),
             name=r['SECURITY_ABBR_A'].strip(),
-            shares=int(float(r['totalShares'].strip()) * 10000) if 'totalShares' in r else None,
+            total_shares=int(float(r['totalShares'].strip()) * 10000) if 'totalShares' in r else None,
             float_shares=int(float(r['totalFlowShares'].strip()) * 10000) if 'totalFlowShares' in r else None
         )
         for r in result

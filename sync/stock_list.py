@@ -12,13 +12,14 @@ import pymongo
 from wild.shse.stock_list import get_stock_list as sh_stock_list
 from wild.szse.stock_list import get_stock_list as sz_stock_list
 
+
 stock_list = sh_stock_list() + sz_stock_list()
 operations = [
     pymongo.UpdateOne(
         {'_id': stock.code},
         {'$set': {
             'name': stock.name,
-            'shares': stock.shares,
+            'total_shares': stock.shares,
             'float_shares': stock.float_shares,
             'update_time': datetime.now(),
         }},

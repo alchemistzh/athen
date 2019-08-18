@@ -29,7 +29,7 @@ stock = namedtuple('stock',
     [
         'code',          # 6 位代码
         'name',          # 简称
-        'shares',        # 总股本
+        'total_shares',  # 总股本
         'float_shares',  # 流通股本
     ]
 )
@@ -51,7 +51,7 @@ def get_stock_list() -> List[stock]:
         stock_list.append(stock(
             code=row[5].value,
             name=row[6].value,
-            shares=int(row[8].value.replace(',', '').strip()),
+            total_shares=int(row[8].value.replace(',', '').strip()),
             float_shares=int(row[9].value.replace(',', '').strip())
         ))
     return stock_list

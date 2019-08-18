@@ -26,7 +26,7 @@ def get_core_conception(stock_code):
     resp = requests.get(url, headers=headers, params=params)
     data = resp.json()
 
-    return data
+    return data['hxtc']
 
 
 if __name__ == '__main__':

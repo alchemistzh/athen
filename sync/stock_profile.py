@@ -6,7 +6,6 @@ import time
 from datetime import datetime
 
 import pymongo
-from pprint import pprint
 
 from wild.xueqiu.stock_profile import get_stock_profile
 from .mongodb import col_stock_profile

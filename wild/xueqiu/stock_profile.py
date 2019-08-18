@@ -61,8 +61,7 @@ def get_stock_profile(stock_code):
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36',
     }
     resp = requests.get(url, params=params, headers=headers, cookies=this.cookies)
-    data = resp.json()['data']
-    return data
+    return resp.json()['data']['quote']
 
 
 if __name__ == '__main__':

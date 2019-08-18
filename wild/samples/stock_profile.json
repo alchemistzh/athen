@@ -24,6 +24,7 @@
             "float_shares": 1529709816, // 流通股
             "high52w": 15.89, // 52周最高
             "low52w": 9.6, // 52周最低
+            "last_close": 13.44, // 收盘价
             "avg_price": 13.641,
             "delayed": 0,
             "type": 11,
@@ -45,7 +46,6 @@
             "timestamp": 1565938800000,
             "amount": 9.357081E7,
             "chg": 0.21,
-            "last_close": 13.44,
             "profit_four": 1.2311179581E9,
             "volume": 6859508,
             "volume_ratio": 1.53,

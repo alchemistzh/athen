@@ -24,7 +24,8 @@ Shareholder = namedtuple('Shareholder', [
     'proportion',     # 持股占流通股比例
     'change',         # 持股变化状态 ("不变", "新进", 或增减数量, 如 "222万")
     'change_percent'  # 持股变化比例
-], defaults=[None]*5)
+])
+Shareholder.__new__.__defaults__ = (None,) * len(Shareholder._fields)
 
 # 基金持股
 Fund = namedtuple('Fund', [
@@ -55,7 +56,7 @@ Restricted = namedtuple('Restricted', [
 # ], defaults=[None]*6)
 
 
-def shareholder_research(stock_code):
+def shareholder_research(session, stock_code):
     """ 股东研究
 
     stock_code -- 6 位股票代码
@@ -67,7 +68,7 @@ def shareholder_research(stock_code):
         "X-Requested-With": 'XMLHttpRequest',
     }
     code = '{}{}'.format('SH' if stock_code.startswith('6') else 'SZ', stock_code)
-    resp = requests.get(url, headers=headers, params={'code': code})
+    resp = session.get(url, headers=headers, params={'code': code})
     data = resp.json()
 
     result = {}
@@ -143,7 +144,8 @@ def shareholder_research(stock_code):
 
 
 if __name__ == '__main__':
-    sr = shareholder_research('300753')
+    s = requests.Session()
+    sr = shareholder_research(s, '300753')
     from pprint import pprint
     pprint(sr['2019-06-30']['float'])
     pprint(sr['2019-06-30']['funds'])

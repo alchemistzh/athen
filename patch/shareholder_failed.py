@@ -57,4 +57,4 @@ for code in failed_codes:
         logging.warning(code, e)
         continue
 
-    time.sleep(0.3)
+    time.sleep(0.1)

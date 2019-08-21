@@ -8,10 +8,8 @@
     见 samples/core_conception.json
 """
 
-import requests
 
-
-def get_core_conception(stock_code):
+def get_core_conception(session, stock_code):
     code = '{}{}'.format('SH' if stock_code.startswith('6') else 'SZ', stock_code)
     url = 'http://f10.eastmoney.com/CoreConception/CoreConceptionAjax'
     headers = {
@@ -23,7 +21,7 @@ def get_core_conception(stock_code):
     params = {
         'code': code,
     }
-    resp = requests.get(url, headers=headers, params=params)
+    resp = session.get(url, headers=headers, params=params)
     data = resp.json()
 
     return data['hxtc']

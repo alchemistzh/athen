@@ -10,8 +10,8 @@ from wild.eastmoney import get_core_conception
 from .mongodb import col_stock_profile, col_subject
 
 
-def pull_and_save(code, name):
-    cc = get_core_conception(code)
+def pull_and_save(session, code, name):
+    cc = get_core_conception(session, code)
     doc = {
         'name': name,
         'groups': [],
@@ -32,12 +32,11 @@ def pull_and_save(code, name):
     )
 
 
+s = requests.Session()
 stock_profile_docs = col_stock_profile.find(projection=['name'])
 for d in stock_profile_docs:
     try:
-        pull_and_save(d['_id'], d['name'])
+        pull_and_save(s, d['_id'], d['name'])
     except Exception as e:
         logging.warning(d['_id'], e)
         continue
-
-    time.sleep(0.2)

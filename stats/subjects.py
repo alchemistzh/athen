@@ -42,7 +42,7 @@ def has_gjd(shareholder_doc) -> bool:
 
 
 def filter_profile(prifle_doc):
-    if prifle_doc['market_capital'] <= 31 * 100000000:
+    if prifle_doc['market_capital'] <= 100 * 100000000:
         return True
     return False
 

@@ -27,4 +27,4 @@ for d in stock_profile_docs:
         logging.warning(d['_id'], e)
         continue
 
-    time.sleep(0.1)
+    # time.sleep(0.1)

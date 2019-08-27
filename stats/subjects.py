@@ -41,8 +41,11 @@ def has_gjd(shareholder_doc) -> bool:
     return False
 
 
+YI = 100000000
+
 def filter_profile(prifle_doc):
-    if prifle_doc['market_capital'] <= 100 * 100000000:
+    cap = prifle_doc['market_capital']
+    if 30*YI < cap < 100*YI:
         return True
     return False
 
@@ -53,7 +56,7 @@ for d in subject_docs:
     if not filter_profile(profile_doc):
         continue
     shareholder_doc = col_shareholder.find_one({'_id': d['_id']})
-    if has_gjd(shareholder_doc) and has_subjects(d, ['汽车零部件']):
+    if has_gjd(shareholder_doc) and has_subjects(d, ['药品流通']):
         print(d['_id'], d['name'])
     # if has_groups(d, ['5G概念', '军工']) and has_gjd(shareholder_doc):
     #     print(d['_id'], d['name'])

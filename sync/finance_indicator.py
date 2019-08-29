@@ -8,12 +8,12 @@ from datetime import datetime
 
 import pymongo
 
-from wild.xueqiu.finance_indicator import get_finance_indicator
+from wild.xueqiu.finance_indicator import get_finance_indicator, ReportType
 from .mongodb import col_stock_profile, col_finance
 
 
 def pull_and_save(code):
-    fi_data = get_finance_indicator(code, 10)
+    fi_data = get_finance_indicator(code, ReportType.Q4, 10)
     for fi in fi_data['list']:
         doc = dict(
             report_name=fi['report_name'],

@@ -8,41 +8,23 @@
     见 samples/stock_profile.json
 """
 
+import requests
 import sys
-
+from wild.xueqiu.cookie import get_cookies
 from wild.util import parse_percent, str_to_int
 
 
-# Save cookie at `this.cookies`
-this = sys.modules[__name__]
-this.cookies = None
+session = requests.Session()
+cookies = None
 
 
-def __get_cookie(session):
-    """
-    通过访问雪球主页获取 Cookie
-    """
-    url = 'https://xueqiu.com'
-    headers = {
-        'Accept': '*/*',
-        'Host': 'xueqiu.com',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Upgrade-Insecure-Requests': '1',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36',
-    }
-    resp = session.get(url, headers=headers)
-    return resp.cookies
-
-
-def get_stock_profile(session, stock_code):
+def get_stock_profile(stock_code):
     """
     stock_code -- 6 位股票代码
     """
-    if this.cookies is None:
-        this.cookies = __get_cookie(session)
-
+    global cookies
+    if cookies is None:
+        cookies = get_cookies(session)
     code = '{}{}'.format('SH' if stock_code.startswith('6') else 'SZ', stock_code)
     url = 'https://stock.xueqiu.com/v5/stock/quote.json'
     params = {
@@ -59,7 +41,7 @@ def get_stock_profile(session, stock_code):
         'Upgrade-Insecure-Requests': '1',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36',
     }
-    resp = session.get(url, params=params, headers=headers, cookies=this.cookies)
+    resp = session.get(url, params=params, headers=headers, cookies=cookies)
     return resp.json()['data']['quote']
 
 

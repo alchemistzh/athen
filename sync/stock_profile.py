@@ -12,8 +12,8 @@ from wild.xueqiu.stock_profile import get_stock_profile
 from .mongodb import col_stock_profile
 
 
-def pull_and_save(session, code):
-    p = get_stock_profile(session, code)
+def pull_and_save(code):
+    p = get_stock_profile(code)
     doc = dict(
         market_capital=p['market_capital'],
         float_market_capital=p['float_market_capital'],
@@ -48,7 +48,7 @@ s = requests.Session()
 stock_profile_docs = col_stock_profile.find(projection=[])
 for d in stock_profile_docs:
     try:
-        pull_and_save(s, d['_id'])
+        pull_and_save(d['_id'])
     except Exception as e:
         logging.warning(d['_id'], e)
         continue

@@ -13,7 +13,7 @@ from wild.util import parse_percent, str_to_int
 session = requests.Session()
 
 
-# 报告期
+# 报告类型 (报告期)
 class ReportType(Enum):
     Q1  = 'Q1'
     Q2  = 'Q2'
@@ -24,7 +24,9 @@ class ReportType(Enum):
 
 def get_finance_indicator(stock_code: str, report_type: ReportType, count: int = 5):
     """
-    stock_code -- 6 位股票代码
+    stock_code  -- 6 位股票代码
+    report_type -- 报告类型
+    count       -- 返回数量
     """
     code = '{}{}'.format('SH' if stock_code.startswith('6') else 'SZ', stock_code)
     url = 'https://stock.xueqiu.com/v5/stock/finance/cn/indicator.json'

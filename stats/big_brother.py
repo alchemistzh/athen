@@ -17,23 +17,23 @@ def inspect_gdj(sh_doc):
     # 最新十大流通股东中有国家队
     gjd_in_cur = False
     for h in cur['float']:
-        if '中央汇金' in h['name'] or '中国证券金融' in h['name']:
+        if '中央汇金' in h['name'] or '中国证券金融' in h['name'] or '社保' in h['name']:
             gjd_in_cur = True
             break
     if not gjd_in_cur:
         return
     # 之前十大流通股东中没有国家队
     for h in prev['float']:
-        if '中央汇金' in h['name'] or '中国证券金融' in h['name']:
+        if '中央汇金' in h['name'] or '中国证券金融' in h['name'] or '社保' in h['name']:
             return
     if prev_prev_date in sh_doc:
         prev_prev = sh_doc[prev_prev_date]
         for h in prev_prev['float']:
-            if '中央汇金' in h['name'] or '中国证券金融' in h['name']:
+            if '中央汇金' in h['name'] or '中国证券金融' in h['name'] or '社保' in h['name']:
                 return
     # 看看是否是前几大股东
     for i, h in enumerate(cur['float']):
-        if i <= 6 and ('中央汇金' in h['name'] or '中国证券金融' in h['name']):
+        if i <= 5 and ('中央汇金' in h['name'] or '中国证券金融' in h['name'] or '社保' in h['name']):
             print(sh_doc['_id'], sh_doc['name'])
             break
 

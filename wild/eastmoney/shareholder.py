@@ -14,6 +14,7 @@
 
 import requests
 from collections import namedtuple
+from pprint import pprint
 
 from wild.util import parse_percent, str_to_int
 
@@ -56,7 +57,10 @@ Restricted = namedtuple('Restricted', [
 # ], defaults=[None]*6)
 
 
-def shareholder_research(session, stock_code):
+session = requests.Session()
+
+
+def shareholder_research(stock_code):
     """ 股东研究
 
     stock_code -- 6 位股票代码
@@ -72,6 +76,7 @@ def shareholder_research(session, stock_code):
     data = resp.json()
 
     result = {}
+    report_by_date = {}
 
     # 十大股东
     for sdgd in data['sdgd']:
@@ -85,7 +90,7 @@ def shareholder_research(session, stock_code):
             )
             for i in sdgd['sdgd']
         ]
-        result.setdefault(sdgd['rq'], {})['total'] = shareholders
+        report_by_date.setdefault(sdgd['rq'], {})['total'] = shareholders
 
     # 十大流通股东
     for sdltgd in data['sdltgd']:
@@ -99,13 +104,23 @@ def shareholder_research(session, stock_code):
             )
             for i in sdltgd['sdltgd']
         ]
-        result.setdefault(sdltgd['rq'], {})['float'] = shareholders
+        report_by_date.setdefault(sdltgd['rq'], {})['float'] = shareholders
+
+    # 把 date dict 转成 list
+    result['report'] = [
+        {
+            'date': date,
+            'float': report_by_date[date].get('float', []),
+            'total': report_by_date[date].get('total', []),
+        }
+        for date in reversed(sorted(report_by_date.keys()))
+    ]
 
     # 基金持股
     data_jjcg = data.get('jjcg', [])
     if data_jjcg:
         for jjcg in data_jjcg:
-            funds = [
+            fund = [
                 dict(
                     code=i['jjdm'],
                     name=i['jjmc'],
@@ -116,7 +131,7 @@ def shareholder_research(session, stock_code):
                 )
                 for i in jjcg['jjcg']
             ]
-            result.setdefault(jjcg['rq'], {})['funds'] = funds
+            report_by_date.setdefault(jjcg['rq'], {})['fund'] = fund
 
     # 限售解禁
     data_xxjj = data.get('xsjj', [])
@@ -144,8 +159,5 @@ def shareholder_research(session, stock_code):
 
 
 if __name__ == '__main__':
-    s = requests.Session()
-    sr = shareholder_research(s, '300753')
-    from pprint import pprint
-    pprint(sr['2019-06-30']['float'])
-    pprint(sr['2019-06-30']['funds'])
+    sr = shareholder_research('002960')
+    pprint(sr)

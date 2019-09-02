@@ -38,6 +38,9 @@ MainPosition = namedtuple('MainPosition', [
 ])
 
 
+session = requests.Session()
+
+
 def get_main_positions(stock_code, date) -> List[MainPosition]:
     """ 获取机构持仓情况
 
@@ -49,7 +52,7 @@ def get_main_positions(stock_code, date) -> List[MainPosition]:
         'code': '{}{}'.format('SH' if stock_code.startswith('6') else 'SZ', stock_code),
         'date': datetime.strftime(date, '%Y-%m-%d'),
     }
-    resp = requests.get(url, params=params)
+    resp = session.get(url, params=params)
     data = resp.json()
     main_positions = [
         MainPosition(

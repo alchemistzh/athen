@@ -2,49 +2,57 @@
 # coding: utf-8
 
 import logging
+from typing import List
 
-from .mongodb import col_stock_profile, col_shareholder
-
-
-cur_date = '2019-06-30'
-prev_date = '2019-03-31'
-prev_prev_date = '2018-12-31'
+from stats.date import REPORT_DATES
+from stats.mongodb import col_shareholder
 
 
-def inspect_gdj(sh_doc):
-    cur = sh_doc[cur_date]
-    prev = sh_doc[prev_date]
-    # 最新十大流通股东中有国家队
-    gjd_in_cur = False
-    for h in cur['float']:
-        if '中央汇金' in h['name'] or '中国证券金融' in h['name'] or '社保' in h['name']:
-            gjd_in_cur = True
-            break
-    if not gjd_in_cur:
-        return
-    # 之前十大流通股东中没有国家队
-    for h in prev['float']:
-        if '中央汇金' in h['name'] or '中国证券金融' in h['name'] or '社保' in h['name']:
-            return
-    if prev_prev_date in sh_doc:
-        prev_prev = sh_doc[prev_prev_date]
-        for h in prev_prev['float']:
-            if '中央汇金' in h['name'] or '中国证券金融' in h['name'] or '社保' in h['name']:
-                return
-    # 看看是否是前几大股东
-    for i, h in enumerate(cur['float']):
-        if i <= 5 and ('中央汇金' in h['name'] or '中国证券金融' in h['name'] or '社保' in h['name']):
-            print(sh_doc['_id'], sh_doc['name'])
-            break
+# big brohter 股东名
+GJD = ['中央汇金', '中国证券金融']
+DJJ = ['国家集成电路产业投资基金']
+MANU = ['先进制造产业投资基金']
+SB = ['社保基金']
+
+def has_big_brother_in(shareholders: List, big_brothers: List, min_proportion=0.0) -> bool:
+    """
+    检查 big brother 是否在股东中
+
+    shareholders   -- 股东列表
+    big_brothers   -- big brother 列表
+    min_proportion -- 最小持仓比例
+    """
+    for sh in shareholders:
+        for bb in big_brothers:
+            if bb in sh['name'] and sh['proportion'] >= min_proportion:
+                return True
+    return False
 
 
-shareholder_docs = col_shareholder.find()
-for sh in shareholder_docs:
-    if cur_date not in sh \
-       or prev_date not in sh \
-       or 'float' not in sh[cur_date]:
+def inspect_big_brothers(doc, big_brothers):
+    """
+    检查并打印: 最新股东中有 big brother, 之前没有
+
+    doc          -- shareholder document
+    big_brothers -- big brother 列表
+    """
+    cur = doc['float'][REPORT_DATES[0]]
+    prev = doc['float'][REPORT_DATES[1]]
+    if has_big_brother_in(cur['list'][0:6], big_brothers, 1.0) and not has_big_brother_in(prev['list'], big_brothers):
+        print(doc['_id'], doc['name'])
+
+
+shareholder_docs = col_shareholder.find({})
+for doc in shareholder_docs:
+    float = doc.get('float')
+    if not float:
+        continue
+    if not float.get(REPORT_DATES[0]) or not float.get(REPORT_DATES[1]):
         continue
     try:
-        inspect_gdj(sh)
+        inspect_big_brothers(doc, GJD)
+        inspect_big_brothers(doc, DJJ)
+        inspect_big_brothers(doc, MANU)
+        inspect_big_brothers(doc, SB)
     except Exception as e:
-        logging.error(sh['_id'], e)
+        logging.error(doc['_id'], e)

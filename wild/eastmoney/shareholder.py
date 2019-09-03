@@ -75,64 +75,59 @@ def shareholder_research(stock_code):
     resp = session.get(url, headers=headers, params={'code': code})
     data = resp.json()
 
-    result = {}
-    report_by_date = {}
+    result = {
+        'float': {},
+        'total': {},
+        'fund': {},
+    }
 
     # 十大股东
     for sdgd in data['sdgd']:
-        shareholders = [
-            dict(
-                name=i['gdmc'],
-                amount=int(i['cgs'].replace(',', '').strip()),
-                proportion=parse_percent(i['zltgbcgbl']),
-                change=i['zj'],
-                change_percent=parse_percent(i['bdbl'])
-            )
-            for i in sdgd['sdgd']
-        ]
-        report_by_date.setdefault(sdgd['rq'], {})['total'] = shareholders
+        result['total'][sdgd['rq']] = dict(
+            list=[
+                dict(
+                    name=i['gdmc'],
+                    amount=int(i['cgs'].replace(',', '').strip()),
+                    proportion=parse_percent(i['zltgbcgbl']),
+                    change=i['zj'],
+                    change_percent=parse_percent(i['bdbl'])
+                )
+                for i in sdgd['sdgd']
+            ]
+        )
 
     # 十大流通股东
     for sdltgd in data['sdltgd']:
-        shareholders = [
-            dict(
-                name=i['gdmc'],
-                amount=int(i['cgs'].replace(',', '').strip()),
-                proportion=parse_percent(i['zltgbcgbl']),
-                change=i['zj'],
-                change_percent=parse_percent(i['bdbl'])
-            )
-            for i in sdltgd['sdltgd']
-        ]
-        report_by_date.setdefault(sdltgd['rq'], {})['float'] = shareholders
-
-    # 把 date dict 转成 list
-    result['report'] = [
-        {
-            'date': date,
-            'float': report_by_date[date].get('float', []),
-            'total': report_by_date[date].get('total', []),
-        }
-        for date in reversed(sorted(report_by_date.keys()))
-    ]
+        result['float'][sdltgd['rq']] = dict(
+            list=[
+                dict(
+                    name=i['gdmc'],
+                    amount=int(i['cgs'].replace(',', '').strip()),
+                    proportion=parse_percent(i['zltgbcgbl']),
+                    change=i['zj'],
+                    change_percent=parse_percent(i['bdbl'])
+                )
+                for i in sdltgd['sdltgd']
+            ]
+        )
 
     # 基金持股
     data_jjcg = data.get('jjcg', [])
     if data_jjcg:
         for jjcg in data_jjcg:
-            fund = [
-                dict(
-                    code=i['jjdm'],
-                    name=i['jjmc'],
-                    amount=int(float(i['cgs'].replace(',', '').strip())),
-                    value=int(float(i['cgsz'].replace(',', '').strip())),
-                    proportion=parse_percent(i['zltb']),
-                    net=parse_percent(i['zjzb']),
-                )
-                for i in jjcg['jjcg']
-            ]
-            report_by_date.setdefault(jjcg['rq'], {})['fund'] = fund
-
+            result['fund'][jjcg['rq']] = dict(
+                list=[
+                    dict(
+                        code=i['jjdm'],
+                        name=i['jjmc'],
+                        amount=int(float(i['cgs'].replace(',', '').strip())),
+                        value=int(float(i['cgsz'].replace(',', '').strip())),
+                        proportion=parse_percent(i['zltb']),
+                        net=parse_percent(i['zjzb']),
+                    )
+                    for i in jjcg['jjcg']
+                ]
+            )
     # 限售解禁
     data_xxjj = data.get('xsjj', [])
     if data_xxjj:
@@ -159,5 +154,5 @@ def shareholder_research(stock_code):
 
 
 if __name__ == '__main__':
-    sr = shareholder_research('002960')
-    pprint(sr)
+    r = shareholder_research('603496')
+    pprint(r)

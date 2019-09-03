@@ -10,7 +10,7 @@ from stats.mongodb import col_stock_profile, col_shareholder
 from wild.eastmoney import shareholder_research, get_main_positions
 
 
-MAX_MARKET_CAPITAL = 60*100000000
+MAX_MARKET_CAPITAL = 100*100000000
 
 
 def main_position_proportion_by_order():

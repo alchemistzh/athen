@@ -5,21 +5,21 @@ import pymongo
 from datetime import date, datetime
 from pprint import pprint
 
-from .mongodb import col_stock_profile, col_shareholder
+from stats.date import REPORT_DATES
+from stats.mongodb import col_stock_profile, col_shareholder
 from wild.eastmoney import shareholder_research, get_main_positions
 
 
-LATEST_DATE = '2019-06-30'
-MAX_MARKET_CAPITAL = 100*100000000
+MAX_MARKET_CAPITAL = 60*100000000
 
 
 def main_position_proportion_by_order():
     main_posisiton_proportions = {}
     for sp in col_stock_profile.find({'market_capital': {'$lt': MAX_MARKET_CAPITAL}}):
         shareholder = col_shareholder.find_one({'_id': sp['_id']})
-        if LATEST_DATE not in shareholder['main_position_date_list']:
+        if REPORT_DATES[0] not in shareholder['main_position_date_list']:
             continue
-        main_positions = get_main_positions(sp['_id'], datetime.strptime(LATEST_DATE, '%Y-%m-%d').date())
+        main_positions = get_main_positions(sp['_id'], datetime.strptime(REPORT_DATES[0], '%Y-%m-%d').date())
         for mp in main_positions:
             if mp.type == '合计':
                 main_posisiton_proportions[sp['name']] = mp
@@ -35,5 +35,24 @@ def top_10_shareholders_proportion_by_order():
     pass
 
 
+def fund_proportion_by_order():
+    """
+    基金股持股比例从高到低排序
+    """
+    stocks_with_fund_proportion = []
+    for sp in col_stock_profile.find({'market_capital': {'$lt': MAX_MARKET_CAPITAL}}):
+        sh = col_shareholder.find_one({'_id': sp['_id']})
+        fund = sh.get('fund')
+        if not fund or not fund.get(REPORT_DATES[0]):
+            continue
+        stocks_with_fund_proportion.append({
+            'code': sp['_id'],
+            'name': sp['name'],
+            'proportion': fund[REPORT_DATES[0]]['proportion'],
+        })
+    ordered = sorted(stocks_with_fund_proportion, key=lambda k: k['proportion'], reverse=True)
+    for i in ordered:
+        print(i['code'], i['name'], i['proportion'])
+
 if __name__ == '__main__':
-    main_position_proportion_by_order()
+    fund_proportion_by_order()

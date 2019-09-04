@@ -47,3 +47,4 @@ for d in stock_profile_docs:
     except Exception as e:
         logging.warning(d['_id'], e)
         continue
+    time.sleep(0.1)

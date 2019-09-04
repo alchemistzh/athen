@@ -3,7 +3,7 @@
 
 import logging
 
-from .mongodb import col_stock_profile, col_shareholder, col_subject
+from stats.mongodb import col_stock_profile, col_shareholder, col_subject
 
 
 cur_date = '2019-06-30'
@@ -43,11 +43,16 @@ def has_gjd(shareholder_doc) -> bool:
 
 YI = 100000000
 
-def filter_profile(prifle_doc):
-    cap = prifle_doc['market_capital']
+
+def filter_profile(doc):
+    cap = doc['market_capital']
     if 30*YI < cap < 100*YI:
         return True
     return False
+
+
+def filter_finance_indicator(fi_doc):
+    return True
 
 
 subject_docs = col_subject.find()

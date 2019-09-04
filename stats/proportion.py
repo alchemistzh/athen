@@ -54,5 +54,6 @@ def fund_proportion_by_order():
     for i in ordered:
         print(i['code'], i['name'], i['proportion'])
 
+
 if __name__ == '__main__':
     fund_proportion_by_order()

@@ -38,7 +38,7 @@ def get_stock_profile(stock_code):
         'Upgrade-Insecure-Requests': '1',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36',
     }
-    resp = session.get(url, params=params, headers=headers, cookies=get_cookies())
+    resp = session.get(url, params=params, headers=headers, cookies=get_cookies(), allow_redirects=False)
     return resp.json()['data']['quote']
 
 

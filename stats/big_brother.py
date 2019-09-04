@@ -4,8 +4,8 @@
 import logging
 from typing import List
 
-from stats.date import REPORT_DATES
 from stats.mongodb import col_shareholder
+from util.datetime import REPORT_DATES
 
 
 # big brohter 股东名

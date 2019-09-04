@@ -7,8 +7,9 @@ from datetime import datetime
 
 import pymongo
 
+from sync.mongodb import col_stock_profile, col_shareholder
+from util.datetime import CURRENT_REPORT_DATE
 from wild.eastmoney import shareholder_research, get_main_positions
-from .mongodb import col_stock_profile, col_shareholder
 
 
 def sum_total_proportion(doc):
@@ -29,6 +30,18 @@ def sum_total_proportion(doc):
         fund['proportion'] = p
 
 
+def copy_proportion_to_stock_profile(stock_profile_doc, shareholder_doc):
+    total = shareholder_doc['total'].get(CURRENT_REPORT_DATE)
+    if total:
+        stock_profile_doc['total_proportion'] = total['proportion']
+    float = shareholder_doc['float'].get(CURRENT_REPORT_DATE)
+    if float:
+        stock_profile_doc['float_proportion'] = float['proportion']
+    fund = shareholder_doc['fund'].get(CURRENT_REPORT_DATE)
+    if fund:
+        stock_profile_doc['fund_proportion'] = fund['proportion']
+
+
 stock_profile_docs = col_stock_profile.find(projection=['name'])
 for d in stock_profile_docs:
     try:
@@ -41,6 +54,11 @@ for d in stock_profile_docs:
             {'_id': d['_id']},
             {'$set': doc},
             upsert=True
+        )
+        copy_proportion_to_stock_profile(d, doc)
+        col_stock_profile.update_one(
+            {'_id': d['_id']},
+            {'$set': d},
         )
     except Exception as e:
         logging.warning(d['_id'], e)

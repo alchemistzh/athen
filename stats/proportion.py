@@ -5,8 +5,8 @@ import pymongo
 from datetime import date, datetime
 from pprint import pprint
 
-from stats.date import REPORT_DATES
 from stats.mongodb import col_stock_profile, col_shareholder
+from util.datetime import REPORT_DATES
 from wild.eastmoney import shareholder_research, get_main_positions
 
 

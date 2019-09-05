@@ -14,6 +14,19 @@ DJJ = ['国家集成电路产业投资基金']
 MANU = ['先进制造产业投资基金']
 SB = ['社保基金']
 
+
+def has_gjd(shareholder_doc) -> bool:
+    if REPORT_DATES[0] in shareholder_doc and 'float' in shareholder_doc[REPORT_DATES[0]]:
+        for h in shareholder_doc[REPORT_DATES[0]]['float']:
+            if '中央汇金' in h['name'] or '中国证券金融' in h['name']:
+                return True
+    if REPORT_DATES[1] in shareholder_doc and 'float' in shareholder_doc[REPORT_DATES[1]]:
+        for h in shareholder_doc[REPORT_DATES[1]]['float']:
+            if '中央汇金' in h['name'] or '中国证券金融' in h['name']:
+                return True
+    return False
+
+
 def has_big_brother_in(shareholders: List, big_brothers: List, min_proportion=0.0) -> bool:
     """
     检查 big brother 是否在股东中

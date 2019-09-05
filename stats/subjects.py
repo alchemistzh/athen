@@ -16,8 +16,9 @@ def has_subject_and(doc, core, detail) -> bool:
         if c not in doc['core']:
             return False
     for d in detail:
-        if d not in doc['detail']:
-            return False
+        for item in doc['detail']:
+            if d not in item['title'] and d not in item['content']:
+                return False
     return True
 
 
@@ -26,19 +27,8 @@ def has_subject_or(doc, core, detail) -> bool:
         if c in doc['core']:
             return True
     for d in detail:
-        if d in doc['detail']:
-            return True
-    return False
-
-
-def has_gjd(shareholder_doc) -> bool:
-    if cur_date in shareholder_doc and 'float' in shareholder_doc[cur_date]:
-        for h in shareholder_doc[cur_date]['float']:
-            if '中央汇金' in h['name'] or '中国证券金融' in h['name']:
-                return True
-    if prev_date in shareholder_doc and 'float' in shareholder_doc[prev_date]:
-        for h in shareholder_doc[prev_date]['float']:
-            if '中央汇金' in h['name'] or '中国证券金融' in h['name']:
+        for item in doc['detail']:
+            if d in item['title'] or d in item['content']:
                 return True
     return False
 
@@ -66,17 +56,30 @@ def filter_finance_indicator(fi_doc):
     return True
 
 
+parser = argparse.ArgumentParser(add_help=False)
+parser.add_argument('-c', '--core', help='core', type=str, default='')
+parser.add_argument('-d', '--detail', help='detail', type=str, default='')
+args = parser.parse_args()
+
+
 if __name__ == '__main__':
+    subject_core = []
+    if args.core:
+        subject_core = args.core.split(',') if ',' in args.core else [args.core]
+    subject_detail = []
+    if args.detail:
+        subject_detail = args.detail.split(',') if ',' in args.detail else [args.detail]
+
     stock_profile_docs = []
     subject_docs = col_subject.find()
     for d in subject_docs:
-        if not has_subject_or(d, SUBJECT_CORE, SUBJECT_DETAIL):
+        if not has_subject_or(d, subject_core, subject_detail):
             continue
         profile_doc = col_stock_profile.find_one({'_id': d['_id']})
-        if not filter_profile(profile_doc):
-            continue
-        finance_doc = col_finance.find_one({'_id': d['_id']})
-        if not filter_finance_indicator(finance_doc):
-            continue
+        # if not filter_profile(profile_doc):
+        #     continue
+        # finance_doc = col_finance.find_one({'_id': d['_id']})
+        # if not filter_finance_indicator(finance_doc):
+        #     continue
         stock_profile_docs.append(profile_doc)
     order_by_fund_proportion(stock_profile_docs)

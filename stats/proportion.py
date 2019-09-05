@@ -35,12 +35,12 @@ def top_10_shareholders_proportion_by_order():
     pass
 
 
-def fund_proportion_by_order(stock_profile_docs):
+def order_by_fund_proportion(stock_profiles):
     """
     基金股持股比例从高到低排序
     """
     stocks_with_fund_proportion = []
-    for sp in stock_profile_docs:
+    for sp in stock_profiles:
         sh = col_shareholder.find_one({'_id': sp['_id']})
         fund = sh.get('fund')
         if not fund or not fund.get(REPORT_DATES[0]):
@@ -56,4 +56,4 @@ def fund_proportion_by_order(stock_profile_docs):
 
 
 if __name__ == '__main__':
-    fund_proportion_by_order(col_stock_profile.find({'market_capital': {'$lt': MAX_MARKET_CAPITAL}}))
+    order_by_fund_proportion(col_stock_profile.find({'market_capital': {'$lt': MAX_MARKET_CAPITAL}}))

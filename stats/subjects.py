@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+import argparse
 import logging
 
 from stats.mongodb import col_stock_profile, col_shareholder, col_subject, col_finance
-from stats.proportion import fund_proportion_by_order
+from stats.proportion import order_by_fund_proportion
 
 cur_date = '2019-06-30'
 prev_date = '2019-03-31'
@@ -43,46 +44,49 @@ def has_gjd(shareholder_doc) -> bool:
                 return True
     if prev_date in shareholder_doc and 'float' in shareholder_doc[prev_date]:
         for h in shareholder_doc[prev_date]['float']:
-            if '中央汇金' in h['name'] or '中国证券金融' in h['name'] or '社保' in h['name']:
+            if '中央汇金' in h['name'] or '中国证券金融' in h['name']:
                 return True
     return False
 
 
 YI = 100000000
+MAX_MARKET_CAPITAL = 10000*YI
+MIN_MARKET_CAPITAL = 0*YI
+SUBJECTS = ['铁路基建']
 
 
 def filter_profile(doc):
-    return True
     cap = doc['market_capital']
-    if 10*YI < cap < 200*YI:
+    if MIN_MARKET_CAPITAL < cap < MAX_MARKET_CAPITAL:
         return True
     return False
 
 
 def filter_finance_indicator(fi_doc):
     reports = fi_doc['reports']
-    if reports[0]['net_profit_yoy'] < 30:
+    if reports[0]['net_profit_yoy'] < 0:
         return False
-    if len(reports) > 2 and reports[2]['net_profit_yoy'] < 0:
-        return False
+    # if len(reports) > 2 and reports[2]['net_profit_yoy'] < 0:
+    #     return False
     return True
 
 
-stock_profile_docs = []
-subject_docs = col_subject.find()
-for d in subject_docs:
-    if not has_group_or(d, ['一带一路', '铁路基建']):
-        continue
-    profile_doc = col_stock_profile.find_one({'_id': d['_id']})
-    if not filter_profile(profile_doc):
-        continue
-    finance_doc = col_finance.find_one({'_id': d['_id']})
-    if not filter_finance_indicator(finance_doc):
-        continue
-    stock_profile_docs.append(profile_doc)
+if __name__ == '__main__':
+    stock_profile_docs = []
+    subject_docs = col_subject.find()
+    for d in subject_docs:
+        if not has_group_or(d, SUBJECTS) and not has_subjects(d, SUBJECTS):
+            continue
+        profile_doc = col_stock_profile.find_one({'_id': d['_id']})
+        if not filter_profile(profile_doc):
+            continue
+        finance_doc = col_finance.find_one({'_id': d['_id']})
+        if not filter_finance_indicator(finance_doc):
+            continue
+        stock_profile_docs.append(profile_doc)
 
-    # shareholder_doc = col_shareholder.find_one({'_id': d['_id']})
-    # if has_groups(d, ['5G概念', '军工']) and has_gjd(shareholder_doc):
-    #     print(d['_id'], d['name'])
+        # shareholder_doc = col_shareholder.find_one({'_id': d['_id']})
+        # if has_groups(d, ['5G概念', '军工']) and has_gjd(shareholder_doc):
+        #     print(d['_id'], d['name'])
 
-fund_proportion_by_order(stock_profile_docs)
+    order_by_fund_proportion(stock_profile_docs)

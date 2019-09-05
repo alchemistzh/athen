@@ -36,8 +36,6 @@ def has_subject_or(doc, core, detail) -> bool:
 YI = 100000000
 MAX_MARKET_CAPITAL = 10000*YI
 MIN_MARKET_CAPITAL = 0*YI
-SUBJECT_CORE = ['铁路基建']
-SUBJECT_DETAIL = []
 
 
 def filter_profile(doc):

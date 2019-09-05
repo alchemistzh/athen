@@ -14,14 +14,14 @@ def pull_and_save(session, code, name):
     cc = get_core_conception(session, code)
     doc = {
         'name': name,
-        'groups': [],
-        'subjects': []
+        'core': [],
+        'detail': []
     }
     for i in cc:
         if i['gjc'] == '所属板块':
-            doc['groups'] = i['ydnr'].split(' ')
+            doc['core'] = i['ydnr'].split(' ')
             continue
-        doc['subjects'].append({
+        doc['detail'].append({
             'title': i['gjc'],
             'content': i['ydnr']
         })

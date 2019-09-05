@@ -11,30 +11,24 @@ cur_date = '2019-06-30'
 prev_date = '2019-03-31'
 
 
-def has_group_and(doc, groups) -> bool:
-    for g in groups:
-        if g in doc['groups']:
+def has_subject_and(doc, core, detail) -> bool:
+    for c in core:
+        if c not in doc['core']:
+            return False
+    for d in detail:
+        if d not in doc['detail']:
             return False
     return True
 
 
-def has_group_or(doc, groups) -> bool:
-    for g in groups:
-        if g in doc['groups']:
+def has_subject_or(doc, core, detail) -> bool:
+    for c in core:
+        if c in doc['core']:
+            return True
+    for d in detail:
+        if d in doc['detail']:
             return True
     return False
-
-
-def has_subjects(doc, targets) -> bool:
-    for t in targets:
-        found_t = False
-        for sub in doc['subjects']:
-            if t in sub['title']:
-                found_t = True
-                break
-        if not found_t:
-            return False
-    return True
 
 
 def has_gjd(shareholder_doc) -> bool:
@@ -52,7 +46,8 @@ def has_gjd(shareholder_doc) -> bool:
 YI = 100000000
 MAX_MARKET_CAPITAL = 10000*YI
 MIN_MARKET_CAPITAL = 0*YI
-SUBJECTS = ['铁路基建']
+SUBJECT_CORE = ['铁路基建']
+SUBJECT_DETAIL = []
 
 
 def filter_profile(doc):
@@ -75,7 +70,7 @@ if __name__ == '__main__':
     stock_profile_docs = []
     subject_docs = col_subject.find()
     for d in subject_docs:
-        if not has_group_or(d, SUBJECTS) and not has_subjects(d, SUBJECTS):
+        if not has_subject_or(d, SUBJECT_CORE, SUBJECT_DETAIL):
             continue
         profile_doc = col_stock_profile.find_one({'_id': d['_id']})
         if not filter_profile(profile_doc):
@@ -84,9 +79,4 @@ if __name__ == '__main__':
         if not filter_finance_indicator(finance_doc):
             continue
         stock_profile_docs.append(profile_doc)
-
-        # shareholder_doc = col_shareholder.find_one({'_id': d['_id']})
-        # if has_groups(d, ['5G概念', '军工']) and has_gjd(shareholder_doc):
-        #     print(d['_id'], d['name'])
-
     order_by_fund_proportion(stock_profile_docs)

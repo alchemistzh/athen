@@ -11,7 +11,7 @@ operations = [
     pymongo.UpdateOne(
         {'_id': sub['_id']},
         {'$set': {
-            'subject': sub['groups']
+            'subject': sub['core']
         }},
     )
     for sub in subject_docs

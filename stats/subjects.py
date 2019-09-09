@@ -5,7 +5,7 @@ import argparse
 import logging
 
 from stats.mongodb import col_stock_profile, col_shareholder, col_subject, col_finance
-from stats.proportion import order_by_fund_proportion
+from stats.proportion import sort_by_fund_proportion
 
 cur_date = '2019-06-30'
 prev_date = '2019-03-31'
@@ -29,6 +29,7 @@ def has_subject_or(doc, core, detail) -> bool:
     for d in detail:
         for item in doc['detail']:
             if d in item['title'] or d in item['content']:
+                doc['title'] = item['title']
                 return True
     return False
 
@@ -80,4 +81,4 @@ if __name__ == '__main__':
         # if not filter_finance_indicator(finance_doc):
         #     continue
         stock_profile_docs.append(profile_doc)
-    order_by_fund_proportion(stock_profile_docs)
+    sort_by_fund_proportion(stock_profile_docs)

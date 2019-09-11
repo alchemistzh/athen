@@ -16,9 +16,14 @@ def has_subject_and(doc, core, detail) -> bool:
         if c not in doc['core']:
             return False
     for d in detail:
+        found = False
         for item in doc['detail']:
-            if d not in item['title'] and d not in item['content']:
-                return False
+            if d in item['title'] or d in item['content']:
+                doc['title'] = item['title']
+                found = True
+                break
+        if not found:
+            return False
     return True
 
 
@@ -46,9 +51,9 @@ def filter_profile(doc):
     return False
 
 
-def filter_finance_indicator(fi_doc):
+def filter_finance_indicator(fi_doc, min_net_profit_yoy):
     reports = fi_doc['reports']
-    if reports[0]['net_profit_yoy'] < 0:
+    if reports[0]['net_profit_yoy'] and reports[0]['net_profit_yoy'] < min_net_profit_yoy:
         return False
     # if len(reports) > 2 and reports[2]['net_profit_yoy'] < 0:
     #     return False
@@ -58,6 +63,7 @@ def filter_finance_indicator(fi_doc):
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument('-c', '--core', help='core', type=str, default='')
 parser.add_argument('-d', '--detail', help='detail', type=str, default='')
+parser.add_argument('-p', '--net_profit_yoy', help='net profit yoy', type=float, default=-1000.0)
 args = parser.parse_args()
 
 
@@ -68,17 +74,16 @@ if __name__ == '__main__':
     subject_detail = []
     if args.detail:
         subject_detail = args.detail.split(',') if ',' in args.detail else [args.detail]
-
     stock_profile_docs = []
     subject_docs = col_subject.find()
     for d in subject_docs:
-        if not has_subject_or(d, subject_core, subject_detail):
+        if not has_subject_and(d, subject_core, subject_detail):
             continue
         profile_doc = col_stock_profile.find_one({'_id': d['_id']})
-        # if not filter_profile(profile_doc):
-        #     continue
-        # finance_doc = col_finance.find_one({'_id': d['_id']})
-        # if not filter_finance_indicator(finance_doc):
-        #     continue
+        if not filter_profile(profile_doc):
+            continue
+        finance_doc = col_finance.find_one({'_id': d['_id']})
+        if not filter_finance_indicator(finance_doc, args.net_profit_yoy):
+            continue
         stock_profile_docs.append(profile_doc)
     sort_by_fund_proportion(stock_profile_docs)

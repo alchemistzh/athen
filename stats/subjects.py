@@ -4,7 +4,7 @@
 import argparse
 import logging
 
-from stats.mongodb import col_stock_profile, col_shareholder, col_subject, col_finance
+from db import col_stock_profile, col_shareholder, col_subject, col_finance
 from stats.proportion import sort_by_fund_proportion
 
 cur_date = '2019-06-30'

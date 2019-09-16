@@ -4,7 +4,7 @@
 import logging
 from typing import List
 
-from stats.mongodb import col_shareholder
+from db import col_shareholder
 from util.datetime import REPORT_DATES
 
 

@@ -43,4 +43,4 @@ def get_stock_profile(stock_code):
 
 
 if __name__ == '__main__':
-    print(get_stock_profile('600739'))
+    print(get_stock_profile('600519'))

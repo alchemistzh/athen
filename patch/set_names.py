@@ -8,7 +8,7 @@ from datetime import datetime
 import pymongo
 
 from wild.eastmoney import shareholder_research, get_main_positions
-from sync.mongodb import col_stock_profile, col_shareholder
+from db import col_stock_profile, col_shareholder
 
 
 stock_profile_docs = col_stock_profile.find(projection=['name'])

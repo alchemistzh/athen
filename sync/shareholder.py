@@ -7,7 +7,7 @@ from datetime import datetime
 
 import pymongo
 
-from sync.mongodb import col_stock_profile, col_shareholder
+from db import col_stock_profile, col_shareholder
 from util.datetime import CURRENT_REPORT_DATE
 from wild.eastmoney import shareholder_research, get_main_positions
 

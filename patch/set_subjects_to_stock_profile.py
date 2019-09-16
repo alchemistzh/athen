@@ -3,7 +3,7 @@
 
 import pymongo
 
-from sync.mongodb import col_stock_profile, col_subject
+from db import col_stock_profile, col_subject
 
 
 subject_docs = col_subject.find()

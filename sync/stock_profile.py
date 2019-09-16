@@ -9,7 +9,7 @@ from datetime import datetime
 import pymongo
 
 from wild.xueqiu.stock_profile import get_stock_profile
-from .mongodb import col_stock_profile
+from db import col_stock_profile
 
 
 def pull_and_save(code):

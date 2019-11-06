@@ -7,7 +7,7 @@ from datetime import datetime
 
 import requests
 from wild.eastmoney import get_core_conception
-from .mongodb import col_stock_profile, col_subject
+from db import col_stock_profile, col_subject
 
 
 def pull_and_save(session, code, name):

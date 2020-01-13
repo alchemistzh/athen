@@ -82,8 +82,8 @@ if __name__ == '__main__':
         profile_doc = col_stock_profile.find_one({'_id': d['_id']})
         if not filter_profile(profile_doc):
             continue
-        finance_doc = col_finance.find_one({'_id': d['_id']})
-        if not filter_finance_indicator(finance_doc, args.net_profit_yoy):
-            continue
+        # finance_doc = col_finance.find_one({'_id': d['_id']})
+        # if not filter_finance_indicator(finance_doc, args.net_profit_yoy):
+        #     continue
         stock_profile_docs.append(profile_doc)
     sort_by_fund_proportion(stock_profile_docs)

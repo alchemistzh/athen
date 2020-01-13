@@ -43,12 +43,13 @@ def sort_by_fund_proportion(stock_profiles):
     for sp in stock_profiles:
         sh = col_shareholder.find_one({'_id': sp['_id']})
         fund = sh.get('fund')
-        if not fund or not fund.get(REPORT_DATES[0]):
-            continue
+        p = 0.0
+        if fund and fund.get(REPORT_DATES[0]):
+            p = fund[REPORT_DATES[0]]['proportion']
         stocks_with_fund_proportion.append({
             'code': sp['_id'],
             'name': sp['name'],
-            'proportion': fund[REPORT_DATES[0]]['proportion'],
+            'proportion': p,
         })
     ordered = sorted(stocks_with_fund_proportion, key=lambda k: k['proportion'], reverse=True)
     for i in ordered:
